@@ -1,57 +1,108 @@
-import prisma from "../../configs/prisma.config";
 import { signInDTO } from "./dto/sign-in.dto";
 import { SignUpDTO } from "./dto/sign-up.dto";
-import { ResponseUserDTO } from "../user/dto/response-user.dto";
+import { ResponseUserDTO } from "../user/dto/response.dto";
 import { compare, encrypt } from "../../helpers/encryption.utils";
+import jwt from "jsonwebtoken";
+import {
+  IAuthDecodeToken,
+  payloadAuthToken,
+} from "../../interfaces/token.interfaces";
+import { generateAuthRefreshToken } from "../../services/token.service";
+import { PrismaClient } from "@prisma/client";
+import prismaClient from "../../configs/prisma.config";
 
-const signIn = async ({
-  username,
-  reqPassword,
-}: signInDTO): Promise<ResponseUserDTO | null> => {
-  const data = await prisma.user.findUnique({
-    where: {
-      username,
-    },
-  });
+class AuthService {
+  constructor(private prisma: PrismaClient = prismaClient) {}
 
-  if (!data) {
-    return null;
-  }
+  signIn = async ({
+    username,
+    reqPassword,
+  }: signInDTO): Promise<ResponseUserDTO> => {
+    const data = await this.prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
 
-  const { password, ...user } = data;
+    if (!data) {
+      throw new Error();
+    }
 
-  if (!(await compare(reqPassword, password))) {
-    return null;
-  }
+    const { password, ...user } = data;
 
-  return user;
-};
+    if (!(await compare(reqPassword, password))) {
+      throw new Error();
+    }
 
-const signUp = async (payload: SignUpDTO): Promise<ResponseUserDTO> => {
-  const { reqPassword, repeatPassword, ...data } = payload;
+    return user;
+  };
 
-  const { password, ...user } = await prisma.user.create({
-    data: {
-      ...data,
-      password: await encrypt(reqPassword),
-    },
-  });
+  signUp = async (payload: SignUpDTO): Promise<ResponseUserDTO> => {
+    const { reqPassword, repeatPassword, acceptTermsAndServices, ...data } =
+      payload;
 
-  return user;
-};
+    const { password, ...user } = await this.prisma.user.create({
+      data: {
+        ...data,
+        password: await encrypt(reqPassword),
+      },
+    });
 
-const getProfile = async (userId: string): Promise<ResponseUserDTO | null> => {
-  const data = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-  });
+    return user;
+  };
 
-  if (!data) {
-    return null;
-  }
-  const { password, ...user } = data;
-  return user;
-};
+  getProfile = async (accessToken: string): Promise<ResponseUserDTO | null> => {
+    let userId: string | undefined = undefined;
 
-export { signIn, signUp, getProfile };
+    jwt.verify(accessToken, process.env.JWT_SECRET!, (err, decode) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      userId = (decode as IAuthDecodeToken).userId;
+    });
+
+    if (!userId) {
+      return null;
+    }
+
+    const data = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!data) {
+      return null;
+    }
+    const { password, ...user } = data;
+    return user;
+  };
+
+  refreshToken = async (
+    payload: payloadAuthToken,
+    refreshToken: string
+  ): Promise<string> => {
+    const data = await this.prisma.refreshToken.findMany({
+      where: {
+        userId: payload.userId,
+      },
+      select: {
+        token: true,
+      },
+    });
+
+    const refreshTokens = data.map((refreshToken) => refreshToken.token);
+
+    if (!refreshTokens.includes(refreshToken)) throw new Error();
+
+    await this.prisma.refreshToken.delete({
+      where: { token: refreshToken },
+    });
+
+    return await generateAuthRefreshToken(payload);
+  };
+}
+
+export default AuthService;

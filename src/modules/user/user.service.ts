@@ -1,45 +1,49 @@
-import { User } from "@prisma/client";
-import prisma from "../../configs/prisma.config";
+import { PrismaClient, User } from "@prisma/client";
 import { encrypt } from "../../helpers/encryption.utils";
 import { CreateUserDTO } from "./dto/create-user.dto";
-import { ResponseUserDTO } from "./dto/response-user.dto";
+import { ResponseUserDTO } from "./dto/response.dto";
 import { UpdateUserDTO } from "./dto/update-user.dto";
 import { DeleteUserDTO } from "./dto/delete-user.dto";
+import prismaClient from "../../configs/prisma.config";
+import exclude from "../../configs/exclude.config";
 
-const getUsers = async (): Promise<User[]> => {
-  const users = await prisma.user.findMany();
-  return users;
-};
+class UserService {
+  constructor(private prisma: PrismaClient = prismaClient) {}
 
-const getUserById = async (id: string): Promise<ResponseUserDTO | null> => {
-  const data = await prisma.user.findUnique({
-    where: {
-      id,
-    },
-  });
-  return data;
-};
+  getUsers = async (): Promise<User[]> => {
+    const users = await this.prisma.user.findMany();
+    return users;
+  };
 
-const createUser = async (payload: CreateUserDTO): Promise<ResponseUserDTO> => {
-  const { reqPassword, ...data } = payload;
+  getUserById = async (id: string): Promise<ResponseUserDTO> => {
+    const data = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
 
-  const { password, ...user } = await prisma.user.create({
-    data: {
-      ...data,
-      password: await encrypt(reqPassword),
-    },
-  });
+    if (!data) throw new Error();
 
-  return user;
-};
+    return data;
+  };
 
-const updateUser = async (
-  payload: UpdateUserDTO
-): Promise<ResponseUserDTO | null> => {
-  try {
+  createUser = async (payload: CreateUserDTO): Promise<ResponseUserDTO> => {
+    const { reqPassword, repeatPassword, ...data } = payload;
+
+    const user = await this.prisma.user.create({
+      data: {
+        ...data,
+        password: await encrypt(reqPassword),
+      },
+    });
+
+    return exclude<User, "password">(user, ["password"]);
+  };
+
+  updateUser = async (payload: UpdateUserDTO): Promise<ResponseUserDTO> => {
     const { id, reqPassword, ...dataUpdate } = payload;
 
-    const { password, ...user } = await prisma.user.update({
+    const { password, ...user } = await this.prisma.user.update({
       data: {
         ...dataUpdate,
         password: reqPassword && (await encrypt(reqPassword)),
@@ -48,26 +52,18 @@ const updateUser = async (
     });
 
     return user;
-  } catch (error) {
-    console.log(error);
+  };
 
-    return null;
-  }
-};
-
-const deleteUser = async ({
-  id,
-}: DeleteUserDTO): Promise<Pick<ResponseUserDTO, "id"> | null> => {
-  try {
-    return await prisma.user.delete({
+  deleteUser = async ({
+    id,
+  }: DeleteUserDTO): Promise<Pick<ResponseUserDTO, "id">> => {
+    return await this.prisma.user.delete({
       where: {
         id,
       },
       select: { id: true },
     });
-  } catch (error) {
-    return null;
-  }
-};
+  };
+}
 
-export { getUsers, getUserById, createUser, updateUser, deleteUser };
+export default UserService;

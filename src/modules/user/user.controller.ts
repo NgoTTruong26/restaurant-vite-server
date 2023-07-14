@@ -5,60 +5,96 @@ import {
   IBodyRequest,
   IParamsRequest,
 } from "../../interfaces/request.interfaces";
-import * as userService from "./user.service";
 import { CreateUserDTO } from "./dto/create-user.dto";
 import { UpdateUserDTO } from "./dto/update-user.dto";
 import { DeleteUserDTO } from "./dto/delete-user.dto";
+import { Prisma } from "@prisma/client";
+import getPrismaRequestError from "../../helpers/getPrismaRequestError.helper";
+import UserService from "./user.service";
 
 class UserController {
+  private userService: UserService;
+  constructor() {
+    this.userService = new UserService();
+  }
+
   getUsers = async (req: Request, res: Response) => {
-    const users = await userService.getUsers();
+    const users = await this.userService.getUsers();
     res.status(StatusCodes.OK).send(users);
   };
 
   getUser = async (req: IParamsRequest<{ userId: string }>, res: Response) => {
-    const user = await userService.getUserById(req.params.userId);
-    if (!user) {
+    try {
+      const user = await this.userService.getUserById(req.params.userId);
+      res.send(successResponse(user));
+    } catch (error) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(errorResponse(StatusCodes.BAD_REQUEST, "User not found"));
     }
-    res.send(successResponse(user));
   };
 
   createUser = async (
     req: IBodyRequest<CreateUserDTO, keyof CreateUserDTO>,
     res: Response
   ) => {
-    const user = await userService.createUser(req.body);
-    res.send(successResponse(user, "Created successfully"));
+    try {
+      const user = await this.userService.createUser(req.body);
+      res.send(successResponse(user, "Created successfully"));
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(
+            errorResponse(
+              StatusCodes.BAD_REQUEST,
+              getPrismaRequestError(error.code, error.meta?.target as any)
+            )
+          );
+      }
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(errorResponse(StatusCodes.BAD_REQUEST, "Bad request"));
+    }
   };
 
   updateUser = async (
     req: IBodyRequest<UpdateUserDTO, keyof UpdateUserDTO>,
     res: Response
   ) => {
-    const data = await userService.updateUser(req.body);
-    if (!data) {
+    try {
+      const user = await this.userService.updateUser(req.body);
+      res.send(successResponse(user, "Updated successfully"));
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(
+            errorResponse(
+              StatusCodes.BAD_REQUEST,
+              getPrismaRequestError(error.code, error.meta?.target as any)
+            )
+          );
+      }
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(errorResponse(StatusCodes.BAD_REQUEST, "User not found"));
     }
-    const user = data;
-    res.send(successResponse(user, "Created successfully"));
   };
 
   deleteUser = async (
     req: IBodyRequest<DeleteUserDTO, keyof DeleteUserDTO>,
     res: Response
   ) => {
-    const user = await userService.deleteUser(req.body);
-    if (!user) {
+    try {
+      const user = await this.userService.deleteUser(req.body);
+
+      res.send(successResponse({ id: user.id }, "Deleted successfully"));
+    } catch (error) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(errorResponse(StatusCodes.BAD_REQUEST, "User not found"));
     }
-    res.send(successResponse({ id: user.id }, "Deleted successfully"));
   };
 }
 

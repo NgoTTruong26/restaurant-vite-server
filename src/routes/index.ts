@@ -1,6 +1,8 @@
 import express from "express";
 import userRoute from "./user.route";
 import authRoute from "./auth.route";
+import adminRoute from "./admin.route";
+import dishRouter from "./dish.router";
 
 interface IRoute {
   path: string;
@@ -17,6 +19,14 @@ const routes: IRoute[] = [
   {
     path: "/auth",
     route: authRoute.router,
+  },
+  {
+    path: "/admin",
+    route: adminRoute.router,
+  },
+  {
+    path: "/buffet",
+    route: dishRouter.router,
   },
 ];
 

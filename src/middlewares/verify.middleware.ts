@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { errorResponse } from "../helpers/response.helper";
-import { IAuthToken } from "../interfaces/token.interfaces";
+import { IAuthDecodeToken } from "../interfaces/token.interfaces";
 import jwt from "jsonwebtoken";
 import { IAuthRequest } from "../interfaces/request.interfaces";
 import { StatusCodes } from "http-status-codes";
 
 class Verify {
   verifyToken(
-    req: IAuthRequest<IAuthToken>,
+    req: IAuthRequest<IAuthDecodeToken>,
     res: Response,
     next: NextFunction
   ) {
@@ -26,19 +26,19 @@ class Verify {
           .send(errorResponse(StatusCodes.BAD_REQUEST, "Token is not valid"));
       }
 
-      if (!(decode as IAuthToken).userId)
+      if (!(decode as IAuthDecodeToken).userId)
         return res
           .status(StatusCodes.BAD_REQUEST)
           .send(errorResponse(StatusCodes.BAD_REQUEST, "Token is not valid"));
 
-      req.user = decode as IAuthToken;
+      req.user = decode as IAuthDecodeToken;
 
       next();
     });
   }
 
   verifyAdmin(
-    req: IAuthRequest<IAuthToken>,
+    req: IAuthRequest<IAuthDecodeToken>,
     res: Response,
     next: NextFunction
   ) {

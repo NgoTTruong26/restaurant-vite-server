@@ -1,8 +1,7 @@
-import { error } from "console";
 import App from "./app";
-import prisma from "./configs/prisma.config";
+import prismaClient from "./configs/prisma.config";
 
-prisma
+prismaClient
   .$connect()
   .then(() => {
     console.log("Connected to SQL Database");

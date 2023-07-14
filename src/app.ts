@@ -5,6 +5,7 @@ import cors from "cors";
 import routes from "./routes";
 import { StatusCodes } from "http-status-codes";
 import { errorResponse } from "./helpers/response.helper";
+import cookieParser from "cookie-parser";
 
 class App {
   private app: express.Application;
@@ -25,6 +26,9 @@ class App {
 
     // parse json request body
     this.app.use(express.json());
+
+    // parser cookies
+    this.app.use(cookieParser());
 
     // parse urlencoded request body
     this.app.use(express.urlencoded({ extended: true }));
