@@ -46,6 +46,15 @@ class AdminController {
     }
   };
 
+  createManyNews = async (req: Request, res: Response) => {
+    try {
+      const news = await this.adminService.createManyNews();
+      res.send(successResponse(news, "success"));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   getAdminByRole = async (
     req: IBodyRequest<GetAdminsByRoleDTO, keyof GetAdminsByRoleDTO>,
     res: Response

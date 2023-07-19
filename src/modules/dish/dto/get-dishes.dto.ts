@@ -1,12 +1,22 @@
-export interface GetDishDTO {
+export class GetListDishDTO {
+  dishes: GetDishDTO[];
+  _count: {
+    dishes: number;
+  };
+  nextPage: number | null;
+  idBuffetMenu: string;
+  idSetDish: string;
+}
+
+export class GetDishDTO {
   id: string;
   image: string;
   name: string;
   byNumberOfPeople: boolean;
-  price?: string;
+  price?: string | null;
 }
 
-export interface GetSetDishDTO {
+export class GetSetDishDTO {
   id: string;
   image: string;
   name: string;
@@ -14,7 +24,7 @@ export interface GetSetDishDTO {
   dishes?: GetDishDTO[];
 }
 
-export interface GetBuffetMenuDTO {
+export class GetBuffetMenuDTO {
   id: string;
   name: string;
   image: string;

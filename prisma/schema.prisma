@@ -146,3 +146,14 @@ model RecordEditHistoryForDish {
   note              String?
   modifiedAt        DateTime @default(now())
 }
+
+model News {
+  id        String  @id @default(cuid())
+  title     String  @unique
+  srcImg    String
+  introduce String?
+  content   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

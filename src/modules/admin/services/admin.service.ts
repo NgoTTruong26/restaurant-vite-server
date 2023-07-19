@@ -35,6 +35,21 @@ class AdminService {
     return admin;
   };
 
+  createManyNews = async () => {
+    const newsPreview = await this.prisma.news.createMany({
+      data: [
+        {
+          srcImg:
+            "https://chefdzung.com.vn/uploads/images/album/untitled-1-1200x676-9.jpg",
+          title: "CÁCH LÀM THỊT ĐÔNG ĐƠN GIẢN, CHUẨN VỊ TẾT ",
+          content: "",
+        },
+      ],
+    });
+
+    return newsPreview;
+  };
+
   getAdminByRole = async (
     payload: GetAdminsByRoleDTO
   ): Promise<ResponseAdminDTO[]> => {

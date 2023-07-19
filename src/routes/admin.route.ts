@@ -43,6 +43,7 @@ class AdminRoute extends BaseRoute {
   initializeRoutesAdmin(): void {
     this.router
       .post("/", this.adminController.createAdmin)
+      .post("/create-many-news", this.adminController.createManyNews)
       .get("/get-admin-by-roles", this.adminController.getAdminByRole);
   }
 }
