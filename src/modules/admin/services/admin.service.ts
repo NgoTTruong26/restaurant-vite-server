@@ -41,8 +41,9 @@ class AdminService {
         {
           srcImg:
             "https://chefdzung.com.vn/uploads/images/album/untitled-1-1200x676-9.jpg",
-          title: "CÁCH LÀM THỊT ĐÔNG ĐƠN GIẢN, CHUẨN VỊ TẾT ",
-          content: "",
+          title: "aaaaaaaaaaaa ",
+          content: "bbbbbbbbbbbbbbbbbbbbb",
+          introduce: "helooooooooooooo",
         },
       ],
     });

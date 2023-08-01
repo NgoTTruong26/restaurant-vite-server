@@ -1,12 +1,16 @@
 import { Request, Response } from "express";
 import DishService from "./dish.service";
 import { successResponse } from "../../helpers/response.helper";
-import { IQueryRequest } from "../../interfaces/request.interfaces";
+import {
+  IParamsRequest,
+  IQueryRequest,
+} from "../../interfaces/request.interfaces";
 import {
   GetBuffetMenuQueryDTO,
   GetDishesQueryDTO,
   GetSetDishQueryDTO,
-} from "./dto/get-dishes-params.dto";
+} from "./dto/get-dishes-query.dto";
+import { GetBuffetMenuParamsDTO } from "./dto/get-dish-params.dto";
 
 class DishController {
   private dishService: DishService;
@@ -15,11 +19,20 @@ class DishController {
     this.dishService = new DishService();
   }
 
-  getBuffetMenu = async (
+  getManyBuffetMenu = async (
     req: IQueryRequest<GetBuffetMenuQueryDTO>,
     res: Response
   ) => {
-    const buffetMenu = await this.dishService.getBuffetMenu(req.query);
+    const buffetMenus = await this.dishService.getManyBuffetMenu(req.query);
+
+    res.send(successResponse(buffetMenus, "success"));
+  };
+
+  getBuffetMenu = async (
+    req: IParamsRequest<GetBuffetMenuParamsDTO>,
+    res: Response
+  ) => {
+    const buffetMenu = await this.dishService.getBuffetMenu(req.params);
 
     res.send(successResponse(buffetMenu, "success"));
   };

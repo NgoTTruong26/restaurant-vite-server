@@ -1,5 +1,5 @@
-import { user } from "@prisma/client";
+import { User } from "@prisma/client";
 
-export interface signInDTO extends Pick<user, "username"> {
+export interface signInDTO extends Pick<User, "username"> {
   reqPassword: string;
 }

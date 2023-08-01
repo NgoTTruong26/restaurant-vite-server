@@ -1,4 +1,4 @@
-export class GetListDishDTO {
+export class GetDishesListDTO {
   dishes: GetDishDTO[];
   _count: {
     dishes: number;
@@ -27,6 +27,7 @@ export class GetSetDishDTO {
 export class GetBuffetMenuDTO {
   id: string;
   name: string;
+  price: number;
   image: string;
   special: boolean;
   setDishes?: GetSetDishDTO[];

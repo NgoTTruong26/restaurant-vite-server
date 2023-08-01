@@ -23,6 +23,7 @@ class DishService {
       await this.prisma.buffetMenu.create({
         data: {
           name: payload.name,
+          price: payload.price,
           image: payload.image,
         },
       });

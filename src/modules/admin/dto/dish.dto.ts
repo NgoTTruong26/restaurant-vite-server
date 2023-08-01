@@ -1,5 +1,6 @@
 export interface CreateBuffetMenuDTO {
   name: string;
+  price: number;
   image: string;
 }
 

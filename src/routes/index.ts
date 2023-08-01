@@ -4,6 +4,7 @@ import authRoute from "./auth.route";
 import adminRoute from "./admin.route";
 import dishRouter from "./dish.router";
 import NewsRoute from "./news.route";
+import BookingRoute from "./booking.route";
 
 interface IRoute {
   path: string;
@@ -13,6 +14,8 @@ interface IRoute {
 const router = express.Router();
 
 const newsRoute = new NewsRoute();
+
+const bookingRoute = new BookingRoute();
 
 const routes: IRoute[] = [
   {
@@ -34,6 +37,10 @@ const routes: IRoute[] = [
   {
     path: "/news",
     route: newsRoute.router,
+  },
+  {
+    path: "/booking-table",
+    route: bookingRoute.router,
   },
 ];
 

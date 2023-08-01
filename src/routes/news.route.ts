@@ -11,7 +11,10 @@ class NewsRoute extends BaseRoute {
   }
 
   protected initializeRoutes(): void {
+    this.router.get("/", this.newsController.getNewsList);
     this.router.get("/news-preview", this.newsController.getNewsPreview);
+    this.router.get("/news-latest", this.newsController.getLatestNewsList);
+    this.router.get("/:id", this.newsController.getPost);
   }
 }
 

@@ -1,51 +1,82 @@
 import prismaClient from "../../configs/prisma.config";
+import { GetBuffetMenuParamsDTO } from "./dto/get-dish-params.dto";
 import {
   GetBuffetMenuQueryDTO,
   GetDishesQueryDTO,
   GetSetDishQueryDTO,
-} from "./dto/get-dishes-params.dto";
+} from "./dto/get-dishes-query.dto";
 import {
   GetBuffetMenuDTO,
-  GetListDishDTO,
+  GetDishesListDTO,
   GetSetDishDTO,
 } from "./dto/get-dishes.dto";
 
 class DishService {
   constructor(private prisma = prismaClient) {}
 
-  getBuffetMenu = async (
+  getManyBuffetMenu = async (
     query?: GetBuffetMenuQueryDTO
-  ): Promise<GetBuffetMenuDTO[]> => {
-    const buffetMenu = await this.prisma.buffetMenu.findMany({
-      select: {
-        id: true,
-        name: true,
-        image: true,
-        special: true,
-        setDishes: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-            special: true,
-            dishes: {
-              take: parseInt(query?.limit || "0") || 0,
-              select: {
-                id: true,
-                image: true,
-                name: true,
-                byNumberOfPeople: true,
+  ): Promise<GetBuffetMenuDTO[] | null> => {
+    try {
+      const buffetMenu = await this.prisma.buffetMenu.findMany({
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          image: true,
+          special: true,
+          setDishes: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              special: true,
+              dishes: {
+                take: parseInt(query?.limit || "0") || 0,
+                select: {
+                  id: true,
+                  image: true,
+                  name: true,
+                  byNumberOfPeople: true,
+                },
               },
             },
-          },
-          orderBy: {
-            name: "asc",
+            orderBy: {
+              name: "asc",
+            },
           },
         },
-      },
-    });
+      });
 
-    return buffetMenu;
+      return buffetMenu;
+    } catch (error) {
+      console.log(error);
+
+      return null;
+    }
+  };
+
+  getBuffetMenu = async (
+    params: GetBuffetMenuParamsDTO
+  ): Promise<GetBuffetMenuDTO | null> => {
+    try {
+      const buffetMenu = await this.prisma.buffetMenu.findUnique({
+        where: { id: params.id },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          image: true,
+          special: true,
+        },
+      });
+
+      return buffetMenu;
+    } catch (error) {
+      console.log(error);
+
+      return null;
+    }
   };
 
   getDishPreview = async (
@@ -85,9 +116,9 @@ class DishService {
 
   getDishes = async (
     query: GetDishesQueryDTO
-  ): Promise<GetListDishDTO | undefined> => {
+  ): Promise<GetDishesListDTO | null> => {
     try {
-      const listDishes = await this.prisma.setDish.findUnique({
+      const dishesList = await this.prisma.setDish.findUnique({
         where: {
           id: query.set_dish_id,
           buffetMenus: {
@@ -99,8 +130,8 @@ class DishService {
 
         select: {
           dishes: {
-            skip: parseInt(query.offset),
-            take: parseInt(query.limit),
+            skip: parseInt(query.offset || "0"),
+            take: parseInt(query.limit || "0"),
             select: {
               id: true,
               image: true,
@@ -117,12 +148,12 @@ class DishService {
         },
       });
 
-      if (!listDishes) return undefined;
+      if (!dishesList) throw new Error();
 
       return {
-        ...listDishes,
+        ...dishesList,
         nextPage:
-          listDishes?._count.dishes! >
+          dishesList?._count.dishes! >
           parseInt(query.offset) + parseInt(query.limit)
             ? parseInt(query.offset) + parseInt(query.limit)
             : null,
@@ -131,6 +162,7 @@ class DishService {
       };
     } catch (error) {
       console.log(error);
+      return null;
     }
   };
 }
