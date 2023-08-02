@@ -4,6 +4,12 @@ import { errorResponse, successResponse } from "../../helpers/response.helper";
 import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import getPrismaRequestError from "../../helpers/getPrismaRequestError.helper";
+import {
+  IBodyRequest,
+  IQueryRequest,
+} from "../../interfaces/request.interfaces";
+import { CreateBookingDTO } from "./dto/booking.dto";
+import { GetOneBookingDTO } from "./dto/get-booking-query.dto";
 
 class BookingController {
   private bookingService: BookingService;
@@ -18,19 +24,25 @@ class BookingController {
     res.send(successResponse(childrenCategory, "success"));
   };
 
-  getOneBooking = async (req: Request, res: Response) => {
-    console.log(req.query);
+  getOneBooking = async (
+    req: IQueryRequest<GetOneBookingDTO>,
+    res: Response
+  ) => {
+    const allBookingStatus = await this.bookingService.getBookingStatus();
 
-    const booking = await this.bookingService.getOneBooking();
+    const booking = await this.bookingService.getOneBooking(req.query);
 
-    res.send(successResponse(booking, "success"));
+    res.send(successResponse({ ...booking, allBookingStatus }, "success"));
   };
 
-  createBooking = async (req: Request, res: Response) => {
+  createBooking = async (
+    req: IBodyRequest<CreateBookingDTO, keyof CreateBookingDTO>,
+    res: Response
+  ) => {
     try {
-      const booking = await this.bookingService.createBooking();
+      await this.bookingService.createBooking(req.body);
 
-      res.send(successResponse(booking, "success"));
+      res.send(successResponse(null, "Created success"));
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         console.log(error);
@@ -44,6 +56,24 @@ class BookingController {
             )
           );
       }
+      console.log(error);
+    }
+  };
+
+  getBookingStatus = async (req: Request, res: Response) => {
+    try {
+      const bookingStatus = await this.bookingService.getBookingStatus();
+      res.send(successResponse(bookingStatus, "Success"));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  createBookingStatus = async (req: Request, res: Response) => {
+    try {
+      const bookingStatus = await this.bookingService.createBookingStatus();
+      res.send(successResponse(bookingStatus, "Success"));
+    } catch (error) {
       console.log(error);
     }
   };

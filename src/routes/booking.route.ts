@@ -14,6 +14,8 @@ class BookingRoute extends BaseRoute {
     this.router
       .get("/children-category", this.bookingController.getChildrenCategory)
       .get("/", this.bookingController.getOneBooking)
+      .get("/get-booking-status", this.bookingController.getBookingStatus)
+      .post("/get-booking-status", this.bookingController.createBookingStatus)
       .post("/", this.bookingController.createBooking);
   }
 }

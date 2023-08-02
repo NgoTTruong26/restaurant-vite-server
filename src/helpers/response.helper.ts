@@ -13,7 +13,7 @@ export function successResponse<T>(
 }
 
 export function errorResponse(
-  status = StatusCodes.OK,
+  status = StatusCodes.BAD_GATEWAY,
   message = "Success"
 ): IBodyResponse<null> {
   return {
