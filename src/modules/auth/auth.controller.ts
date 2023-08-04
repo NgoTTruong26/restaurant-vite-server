@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import {
+  IAuthRequest,
   IBodyRequest,
   ICookiesResponse,
 } from "../../interfaces/request.interfaces";
@@ -36,7 +37,7 @@ class AuthController {
         await tokenService.generateAuthTokens(user);
 
       res.cookie(process.env.REFRESH_TOKEN!, refreshToken, {
-        httpOnly: true,
+        httpOnly: false,
         secure: false, // lúc deploy thì để true
         sameSite: "strict",
       });
@@ -78,8 +79,10 @@ class AuthController {
     }
   };
 
-  profile = async (req: Request, res: Response) => {
-    const accessToken = req.headers.authorization?.split(" ")[1];
+  profile = async (req: IAuthRequest<IAuthDecodeToken>, res: Response) => {
+    console.log(req.user);
+
+    const accessToken = req.user?.userId;
 
     if (!accessToken) {
       return res.send(successResponse<null>(null, ""));

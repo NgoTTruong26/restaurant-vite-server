@@ -1,16 +1,16 @@
-import validation from "../middlewares/validate.middleware";
-import Verify from "../middlewares/verify.middleware";
-import AuthController from "../modules/auth/auth.controller";
+import validate from "../middlewares/validate.middleware";
 import UserController from "../modules/user/user.controller";
-import userValidation from "../validations/user.validation";
+import UserValidation from "../validations/user.validation";
 import BaseRoute from "./base.route";
 
 class UserRoute extends BaseRoute {
   private userController: UserController;
+  private userValidation: UserValidation;
 
   constructor() {
     super();
     this.userController = new UserController();
+    this.userValidation = new UserValidation();
     this.initializeRoutes();
   }
 
@@ -20,17 +20,17 @@ class UserRoute extends BaseRoute {
       .get("/users/:userId", this.userController.getUser)
       .post(
         "/users",
-        validation(userValidation.createUser.body),
+        validate(this.userValidation.createUser.body),
         this.userController.createUser
       )
       .put(
         "/users",
-        validation(userValidation.updateUser.body),
+        validate(this.userValidation.updateUser.body),
         this.userController.updateUser
       )
       .delete(
         "/users",
-        validation(userValidation.deleteUser.body),
+        validate(this.userValidation.deleteUser.body),
         this.userController.deleteUser
       );
   }

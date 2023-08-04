@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import {
   CreateBuffetMenuDTO,
   CreateDish,
@@ -16,14 +16,24 @@ import {
   ConnectDishes,
   DishConnectedDTO,
   SetDishConnectedDTO,
-} from "../dto/connectDish.dto";
-import { DisconnectDishes } from "../dto/disconnectDish.dto";
+} from "../dto/connect-dish.dto";
+import { DisconnectDishes } from "../dto/disconnec-dish.dto";
 
 class DishController {
   private DishService: DishService;
   constructor() {
     this.DishService = new DishService();
   }
+
+  createVAT = async (req: Request, res: Response) => {
+    try {
+      await this.DishService.createVAT();
+
+      return res.send(successResponse(null, "Create VAT successfully"));
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   createBuffetMenu = async (
     req: IBodyRequest<CreateBuffetMenuDTO, keyof CreateBuffetMenuDTO>,

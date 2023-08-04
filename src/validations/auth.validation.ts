@@ -100,4 +100,4 @@ class AuthValidation {
   };
 }
 
-export default new AuthValidation();
+export default AuthValidation;

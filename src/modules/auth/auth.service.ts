@@ -2,7 +2,6 @@ import { signInDTO } from "./dto/sign-in.dto";
 import { SignUpDTO } from "./dto/sign-up.dto";
 import { ResponseUserDTO } from "../user/dto/response.dto";
 import { compare, encrypt } from "../../helpers/encryption.utils";
-import jwt from "jsonwebtoken";
 import {
   IAuthDecodeToken,
   payloadAuthToken,
@@ -51,18 +50,7 @@ class AuthService {
     return user;
   };
 
-  getProfile = async (accessToken: string): Promise<ResponseUserDTO | null> => {
-    let userId: string | undefined = undefined;
-
-    jwt.verify(accessToken, process.env.JWT_SECRET!, (err, decode) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-
-      userId = (decode as IAuthDecodeToken).userId;
-    });
-
+  getProfile = async (userId?: string): Promise<ResponseUserDTO | null> => {
     if (!userId) {
       return null;
     }

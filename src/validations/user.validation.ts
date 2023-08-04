@@ -164,4 +164,4 @@ class UserValidation {
   };
 }
 
-export default new UserValidation();
+export default UserValidation;

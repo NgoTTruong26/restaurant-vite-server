@@ -25,6 +25,7 @@ model User {
   email                  String?        @unique @db.VarChar(255)
   password               String         @db.VarChar(255)
   phone                  String?        @unique @db.VarChar(255)
+  bookings               Booking[]
   refreshTokens          RefreshToken[]
   acceptTermsAndServices Boolean        @default(true)
   createdAt              DateTime       @default(now())
@@ -181,8 +182,30 @@ model BookingForChildren {
   updatedAt DateTime @updatedAt
 }
 
+model VAT {
+  id            String         @id @default(cuid())
+  tax           Int            @unique
+  InvoicesPrice InvoicePrice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InvoicePrice {
+  id       String    @id @default(cuid())
+  price    Int
+  VAT      VAT       @relation(fields: [VATId], references: [id])
+  VATId    String
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Booking {
   id                  String               @id @default(cuid())
+  user                User?                @relation(fields: [userId], references: [id])
+  userId              String?
   buffetMenu          BuffetMenu           @relation(fields: [buffetMenuId], references: [id])
   buffetMenuId        String
   phoneNumber         String
@@ -194,6 +217,8 @@ model Booking {
   bookingsForChildren BookingForChildren[]
   bookingStatus       BookingStatus        @relation(fields: [bookingStatusId], references: [id])
   bookingStatusId     String
+  invoicePrice        InvoicePrice         @relation(fields: [invoicePriceId], references: [id])
+  invoicePriceId      String
   cancellation        Boolean              @default(false)
 
   createdAt DateTime @default(now())

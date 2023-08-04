@@ -10,11 +10,19 @@ import {
   ConnectDishes,
   DishConnectedDTO,
   SetDishConnectedDTO,
-} from "../dto/connectDish.dto";
-import { DisconnectDishes } from "../dto/disconnectDish.dto";
+} from "../dto/connect-dish.dto";
+import { DisconnectDishes } from "../dto/disconnec-dish.dto";
 
 class DishService {
   constructor(private prisma: PrismaClient = prismaClient) {}
+
+  createVAT = async (): Promise<void> => {
+    await this.prisma.vAT.create({
+      data: {
+        tax: 5,
+      },
+    });
+  };
 
   createBuffetMenu = async (
     payload: CreateBuffetMenuDTO

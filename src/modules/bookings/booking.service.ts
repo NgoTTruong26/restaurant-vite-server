@@ -23,6 +23,11 @@ class BookingService {
   getOneBooking = async (
     query: GetOneBookingDTO
   ): Promise<GetBookingDTO | null> => {
+    console.log(query.get_booking);
+    if (!query.get_booking) {
+      return null;
+    }
+
     const phoneNumberPattern = /(84|0[3|5|7|8|9])+([0-9]{8})\b/g;
 
     const booking = (
@@ -69,6 +74,18 @@ class BookingService {
               step: true,
             },
           },
+          invoicePrice: {
+            select: {
+              id: true,
+              price: true,
+              VAT: {
+                select: {
+                  id: true,
+                  tax: true,
+                },
+              },
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",
@@ -80,14 +97,28 @@ class BookingService {
   };
 
   createBooking = async (data: CreateBookingDTO): Promise<void> => {
-    const { buffetMenu, bookingsForChildren, ...otherData } = data;
+    const { bookingsForChildren, ...otherData } = data;
+
+    const buffetMenu = await this.prisma.buffetMenu.findUnique({
+      where: {
+        id: otherData.buffetMenu,
+      },
+    });
+
+    if (!buffetMenu) throw new Error();
+
+    const total = bookingsForChildren.reduce((prevs: number, curr) => {
+      return (
+        prevs + ((100 - curr.deals) / 100) * buffetMenu.price * curr.quantity
+      );
+    }, buffetMenu.price * otherData.numberPeople);
 
     await this.prisma.booking.create({
       data: {
         ...otherData,
         buffetMenu: {
           connect: {
-            id: buffetMenu,
+            id: otherData.buffetMenu,
           },
         },
         bookingsForChildren: {
@@ -113,6 +144,16 @@ class BookingService {
         bookingStatus: {
           connect: {
             step: 2,
+          },
+        },
+        invoicePrice: {
+          create: {
+            price: total,
+            VAT: {
+              connect: {
+                tax: 5,
+              },
+            },
           },
         },
       },

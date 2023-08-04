@@ -28,9 +28,13 @@ class BookingController {
     req: IQueryRequest<GetOneBookingDTO>,
     res: Response
   ) => {
-    const allBookingStatus = await this.bookingService.getBookingStatus();
-
     const booking = await this.bookingService.getOneBooking(req.query);
+
+    if (!booking) {
+      res.send(successResponse(null, "success"));
+      return;
+    }
+    const allBookingStatus = await this.bookingService.getBookingStatus();
 
     res.send(successResponse({ ...booking, allBookingStatus }, "success"));
   };

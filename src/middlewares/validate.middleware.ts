@@ -3,7 +3,7 @@ import { Schema } from "joi";
 import { StatusCodes } from "http-status-codes";
 import { errorResponse } from "../helpers/response.helper";
 
-function validation(schema: Schema) {
+function validate(schema: Schema) {
   return (req: Request, res: Response, next: NextFunction) => {
     const { value, error } = schema.validate(req.body);
 
@@ -16,4 +16,4 @@ function validation(schema: Schema) {
     return next();
   };
 }
-export default validation;
+export default validate;
