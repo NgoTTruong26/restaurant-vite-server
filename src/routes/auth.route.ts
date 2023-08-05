@@ -29,8 +29,16 @@ class AuthRoute extends BaseRoute {
         validate(this.authValidation.signIn.body),
         this.authController.signUp
       )
-      .get("/profile", this.verify.verifyToken, this.authController.profile)
-      .post("/refresh-token", this.authController.refreshToken);
+      .get(
+        "/profile",
+        this.verify.verifyAccessTokenCheckAuth,
+        this.authController.profile
+      )
+      .post(
+        "/refresh-token",
+        this.verify.verifyRefreshToken,
+        this.authController.refreshToken
+      );
   }
 }
 

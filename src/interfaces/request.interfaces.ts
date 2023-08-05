@@ -14,8 +14,10 @@ export interface IQueryRequest<T> extends Request {
   query: T & ParamsDictionary;
 }
 
-export interface ICookiesResponse<T> extends Omit<Request, "cookies"> {
+export interface IRefreshTokenRequest<T, R> extends Omit<Request, "cookies"> {
   cookies: T;
+  user?: R;
+  err_jwt_exp?: string;
 }
 
 export interface IAuthRequest<T> extends Request {

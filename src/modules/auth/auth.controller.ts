@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {
   IAuthRequest,
   IBodyRequest,
-  ICookiesResponse,
+  IRefreshTokenRequest,
 } from "../../interfaces/request.interfaces";
 import AuthService from "./auth.service";
 import { signInDTO } from "./dto/sign-in.dto";
@@ -14,10 +14,11 @@ import { RefreshTokenDTO } from "./dto/refresh-token.dto";
 import jwt from "jsonwebtoken";
 import {
   IAuthDecodeToken,
-  payloadAuthToken,
+  IPayloadAuthToken,
 } from "../../interfaces/token.interfaces";
 import { Prisma } from "@prisma/client";
 import getPrismaRequestError from "../../helpers/getPrismaRequestError.helper";
+import { EJWTError } from "../../middlewares/verify.middleware";
 
 class AuthController {
   private authService: AuthService;
@@ -80,15 +81,13 @@ class AuthController {
   };
 
   profile = async (req: IAuthRequest<IAuthDecodeToken>, res: Response) => {
-    console.log(req.user);
+    const userId = req.user?.userId;
 
-    const accessToken = req.user?.userId;
-
-    if (!accessToken) {
+    if (!userId) {
       return res.send(successResponse<null>(null, ""));
     }
 
-    const user = await this.authService.getProfile(accessToken);
+    const user = await this.authService.getProfile(userId);
 
     if (!user) return res.send(successResponse<null>(null, ""));
 
@@ -96,29 +95,39 @@ class AuthController {
   };
 
   refreshToken = async (
-    req: ICookiesResponse<RefreshTokenDTO>,
+    req: IRefreshTokenRequest<RefreshTokenDTO, IAuthDecodeToken>,
     res: Response
   ) => {
     try {
-      let payload: payloadAuthToken;
-
       const refreshToken = req.cookies["refresh_token"];
+      console.log(refreshToken);
 
-      jwt.verify(refreshToken, process.env.JWT_SECRET!, (err, decode) => {
-        if (err) {
-          console.log(err);
-          throw new Error(err.message);
-        }
+      if (req.err_jwt_exp === EJWTError.EXPIRED_ERROR) {
+        await this.authService.deleteRefreshToken(refreshToken);
 
-        payload = { userId: (decode as IAuthDecodeToken).userId };
-      });
+        res.clearCookie(process.env.REFRESH_TOKEN!);
+
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .send(
+            errorResponse(StatusCodes.UNAUTHORIZED, "Phiên đăng nhập hết hạn")
+          );
+      }
+
+      if (!req.user) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .send(
+            errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
+          );
+      }
 
       const newRefreshToken = await this.authService.refreshToken(
-        payload!,
+        req.user,
         refreshToken
       );
 
-      const accessToken = tokenService.generateToken(payload!);
+      const accessToken = tokenService.generateToken(req.user);
 
       res.cookie(process.env.REFRESH_TOKEN!, newRefreshToken, {
         httpOnly: true,
@@ -128,6 +137,8 @@ class AuthController {
 
       res.send(successResponse({ accessToken }, "Successfully"));
     } catch (error) {
+      res.clearCookie(process.env.REFRESH_TOKEN!);
+
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(errorResponse(StatusCodes.BAD_REQUEST, "Refresh token invalid"));

@@ -1,35 +1,46 @@
 import jwt from "jsonwebtoken";
-import {
-  IAuthDecodeToken,
-  payloadAuthToken,
-} from "../interfaces/token.interfaces";
+
 import { ResponseUserDTO } from "../modules/user/dto/response.dto";
 import prisma from "../configs/prisma.config";
+import { IPayloadAuthToken } from "../interfaces/token.interfaces";
 
 interface AuthTokensResponse {
   accessToken: string;
   refreshToken: string;
 }
 
-const generateToken = (payload: payloadAuthToken): string => {
-  return jwt.sign(payload, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_ACCESS_EXPIRATION!,
-  });
+const generateToken = (payload: IPayloadAuthToken): string => {
+  return jwt.sign(
+    { userId: payload.userId } as IPayloadAuthToken,
+    process.env.JWT_SECRET!,
+    {
+      expiresIn: process.env.JWT_ACCESS_EXPIRATION!,
+    }
+  );
 };
 
 const generateAuthRefreshToken = async (
-  payload: payloadAuthToken
+  payload: IPayloadAuthToken
 ): Promise<string> => {
-  const refreshToken = jwt.sign(payload, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRATION!,
-  });
+  const refreshToken = jwt.sign(
+    { userId: payload.userId } as IPayloadAuthToken,
+    process.env.JWT_SECRET!,
+    {
+      expiresIn: "5s",
+    }
+  );
 
   await prisma.refreshToken.create({
     data: {
-      userId: payload.userId,
+      user: {
+        connect: {
+          id: payload.userId,
+        },
+      },
       token: refreshToken,
     },
   });
+
   return refreshToken;
 };
 

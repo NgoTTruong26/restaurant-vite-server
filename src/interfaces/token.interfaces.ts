@@ -4,6 +4,6 @@ export interface IAuthDecodeToken extends JwtPayload {
   userId: string;
 }
 
-export interface payloadAuthToken {
+export interface IPayloadAuthToken {
   userId: string;
 }

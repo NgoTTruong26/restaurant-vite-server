@@ -4,7 +4,7 @@ import { ResponseUserDTO } from "../user/dto/response.dto";
 import { compare, encrypt } from "../../helpers/encryption.utils";
 import {
   IAuthDecodeToken,
-  payloadAuthToken,
+  IPayloadAuthToken,
 } from "../../interfaces/token.interfaces";
 import { generateAuthRefreshToken } from "../../services/token.service";
 import { PrismaClient } from "@prisma/client";
@@ -69,7 +69,7 @@ class AuthService {
   };
 
   refreshToken = async (
-    payload: payloadAuthToken,
+    payload: IPayloadAuthToken,
     refreshToken: string
   ): Promise<string> => {
     const data = await this.prisma.refreshToken.findMany({
@@ -83,13 +83,21 @@ class AuthService {
 
     const refreshTokens = data.map((refreshToken) => refreshToken.token);
 
-    if (!refreshTokens.includes(refreshToken)) throw new Error();
+    if (!refreshTokens.includes(refreshToken)) {
+      throw new Error();
+    }
 
-    await this.prisma.refreshToken.delete({
-      where: { token: refreshToken },
-    });
+    await this.deleteRefreshToken(refreshToken);
 
     return await generateAuthRefreshToken(payload);
+  };
+
+  deleteRefreshToken = async (refreshToken: string) => {
+    console.log(refreshToken);
+
+    return await this.prisma.refreshToken.delete({
+      where: { token: refreshToken },
+    });
   };
 }
 
