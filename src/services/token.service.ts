@@ -26,7 +26,7 @@ const generateAuthRefreshToken = async (
     { userId: payload.userId } as IPayloadAuthToken,
     process.env.JWT_SECRET!,
     {
-      expiresIn: "5s",
+      expiresIn: "7d",
     }
   );
 
