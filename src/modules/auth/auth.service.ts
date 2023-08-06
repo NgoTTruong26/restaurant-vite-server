@@ -71,7 +71,7 @@ class AuthService {
   refreshToken = async (
     payload: IPayloadAuthToken,
     refreshToken: string
-  ): Promise<string> => {
+  ): Promise<void> => {
     const data = await this.prisma.refreshToken.findMany({
       where: {
         userId: payload.userId,
@@ -86,10 +86,6 @@ class AuthService {
     if (!refreshTokens.includes(refreshToken)) {
       throw new Error();
     }
-
-    await this.deleteRefreshToken(refreshToken);
-
-    return await generateAuthRefreshToken(payload);
   };
 
   deleteRefreshToken = async (refreshToken: string) => {

@@ -57,13 +57,18 @@ class Verify {
     if (!token) {
       req.user = undefined;
 
-      return next();
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(
+          errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
+        );
     }
 
     jwt.verify(token, process.env.JWT_SECRET!, (err, decode) => {
       if (err) {
-        req.user = undefined;
-        return next();
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
       }
 
       if (!(decode as IAuthDecodeToken).userId) {

@@ -100,7 +100,6 @@ class AuthController {
   ) => {
     try {
       const refreshToken = req.cookies["refresh_token"];
-      console.log(refreshToken);
 
       if (req.err_jwt_exp === EJWTError.EXPIRED_ERROR) {
         await this.authService.deleteRefreshToken(refreshToken);
@@ -122,21 +121,14 @@ class AuthController {
           );
       }
 
-      const newRefreshToken = await this.authService.refreshToken(
-        req.user,
-        refreshToken
-      );
+      await this.authService.refreshToken(req.user, refreshToken);
 
       const accessToken = tokenService.generateToken(req.user);
 
-      res.cookie(process.env.REFRESH_TOKEN!, newRefreshToken, {
-        httpOnly: true,
-        secure: false, // lúc deploy thì để true
-        sameSite: "strict",
-      });
-
       res.send(successResponse({ accessToken }, "Successfully"));
     } catch (error) {
+      console.log(error);
+
       res.clearCookie(process.env.REFRESH_TOKEN!);
 
       return res
