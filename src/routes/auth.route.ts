@@ -19,6 +19,16 @@ class AuthRoute extends BaseRoute {
 
   protected initializeRoutes(): void {
     this.router
+      .get(
+        "/profile",
+        this.verify.verifyAccessTokenCheckAuth,
+        this.authController.profile
+      )
+      .get(
+        "/get-bookings-table",
+        this.verify.verifyAccessToken,
+        this.authController.getBookings
+      )
       .post(
         "/sign-in",
         validate(this.authValidation.signIn.body),
@@ -29,11 +39,7 @@ class AuthRoute extends BaseRoute {
         validate(this.authValidation.signIn.body),
         this.authController.signUp
       )
-      .get(
-        "/profile",
-        this.verify.verifyAccessTokenCheckAuth,
-        this.authController.profile
-      )
+
       .post(
         "/refresh-token",
         this.verify.verifyRefreshToken,

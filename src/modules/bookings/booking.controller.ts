@@ -61,6 +61,9 @@ class BookingController {
           );
       }
       console.log(error);
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(errorResponse(StatusCodes.BAD_REQUEST, "Bad request"));
     }
   };
 

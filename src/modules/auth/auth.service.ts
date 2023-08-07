@@ -9,6 +9,7 @@ import {
 import { generateAuthRefreshToken } from "../../services/token.service";
 import { PrismaClient } from "@prisma/client";
 import prismaClient from "../../configs/prisma.config";
+import { GetBookingDTO } from "../bookings/dto/booking.dto";
 
 class AuthService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -93,6 +94,69 @@ class AuthService {
 
     return await this.prisma.refreshToken.delete({
       where: { token: refreshToken },
+    });
+  };
+
+  getBookings = async (userId: string): Promise<GetBookingDTO[]> => {
+    return await this.prisma.booking.findMany({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      select: {
+        id: true,
+        phoneNumber: true,
+        author: true,
+        bookingTime: true,
+        bookingDate: true,
+        numberPeople: true,
+        note: true,
+        bookingsForChildren: {
+          select: {
+            id: true,
+            childrenCategory: {
+              select: {
+                id: true,
+                category: true,
+                deals: true,
+              },
+            },
+            quantity: true,
+          },
+        },
+        buffetMenu: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            image: true,
+            special: true,
+          },
+        },
+        bookingStatus: {
+          select: {
+            id: true,
+            name: true,
+            step: true,
+          },
+        },
+        invoicePrice: {
+          select: {
+            id: true,
+            price: true,
+            VAT: {
+              select: {
+                id: true,
+                tax: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   };
 }

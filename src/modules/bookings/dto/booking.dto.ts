@@ -12,6 +12,7 @@ class CreateBookingsForChildren {
 export class CreateBookingDTO {
   buffetMenu: string;
   phoneNumber: string;
+  userId?: string;
   author: string;
   bookingTime: string;
   bookingDate: string;

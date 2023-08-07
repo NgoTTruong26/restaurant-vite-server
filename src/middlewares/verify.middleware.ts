@@ -4,11 +4,14 @@ import { IAuthDecodeToken } from "../interfaces/token.interfaces";
 import jwt from "jsonwebtoken";
 import {
   IAuthRequest,
+  IBodyRequest,
+  IBodyRequestVerifyCheckUser,
   IRefreshTokenRequest,
 } from "../interfaces/request.interfaces";
 import { StatusCodes } from "http-status-codes";
 import { RefreshTokenDTO } from "../modules/auth/dto/refresh-token.dto";
-import AuthService from "../modules/auth/auth.service";
+import { CreateBookingDTO } from "../modules/bookings/dto/booking.dto";
+import { IPayloadAuthToken } from "../interfaces/token.interfaces";
 
 export enum EJWTError {
   EXPIRED_ERROR = "TokenExpiredError",
@@ -37,10 +40,13 @@ class Verify {
           .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
       }
 
-      if (!(decode as IAuthDecodeToken).userId)
+      if (!(decode as IAuthDecodeToken).userId) {
+        req.user = undefined;
+
         return res
           .status(StatusCodes.UNAUTHORIZED)
           .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
+      }
 
       req.user = decode as IAuthDecodeToken;
 
@@ -48,11 +54,11 @@ class Verify {
     });
   }
 
-  verifyAccessTokenCheckAuth(
+  verifyAccessTokenCheckAuth = (
     req: IAuthRequest<IAuthDecodeToken>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       req.user = undefined;
@@ -81,13 +87,15 @@ class Verify {
 
       next();
     });
-  }
 
-  verifyRefreshToken(
+    return;
+  };
+
+  verifyRefreshToken = (
     req: IRefreshTokenRequest<RefreshTokenDTO, IAuthDecodeToken>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const refreshToken = req.cookies["refresh_token"];
 
     if (!refreshToken)
@@ -130,17 +138,41 @@ class Verify {
 
       next();
     });
-  }
 
-  verifyAdmin(
+    return;
+  };
+
+  verifyAdmin = (
     req: IAuthRequest<IAuthDecodeToken>,
     res: Response,
     next: NextFunction
-  ) {
-    this.verifyAccessToken(req, res, () => {
+  ) => {
+    return this.verifyAccessToken(req, res, () => {
       console.log(req.user);
     });
-  }
+  };
+
+  verifyBooking = (
+    req: IBodyRequestVerifyCheckUser<CreateBookingDTO, IPayloadAuthToken>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    if (req.body.userId) {
+      const checkUser = () => {
+        if (req.body.userId === req.user?.userId) {
+          return next();
+        }
+
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .send("You are not allowed to bookings for other people");
+      };
+
+      return this.verifyAccessToken(req, res, checkUser);
+    }
+
+    next();
+  };
 }
 
 export default Verify;

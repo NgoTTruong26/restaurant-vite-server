@@ -1,12 +1,15 @@
+import Verify from "../middlewares/verify.middleware";
 import BookingController from "../modules/bookings/booking.controller";
 import BaseRoute from "./base.route";
 
 class BookingRoute extends BaseRoute {
   private bookingController: BookingController;
+  private verify: Verify;
 
   constructor() {
     super();
     this.bookingController = new BookingController();
+    this.verify = new Verify();
     this.initializeRoutes();
   }
 
@@ -16,7 +19,11 @@ class BookingRoute extends BaseRoute {
       .get("/", this.bookingController.getOneBooking)
       .get("/get-booking-status", this.bookingController.getBookingStatus)
       .post("/get-booking-status", this.bookingController.createBookingStatus)
-      .post("/", this.bookingController.createBooking);
+      .post(
+        "/",
+        this.verify.verifyBooking,
+        this.bookingController.createBooking
+      );
   }
 }
 

@@ -97,7 +97,7 @@ class BookingService {
   };
 
   createBooking = async (data: CreateBookingDTO): Promise<void> => {
-    const { bookingsForChildren, ...otherData } = data;
+    const { bookingsForChildren, userId, ...otherData } = data;
 
     const buffetMenu = await this.prisma.buffetMenu.findUnique({
       where: {
@@ -112,6 +112,55 @@ class BookingService {
         prevs + ((100 - curr.deals) / 100) * buffetMenu.price * curr.quantity
       );
     }, buffetMenu.price * otherData.numberPeople);
+
+    if (!userId) {
+      await this.prisma.booking.create({
+        data: {
+          ...otherData,
+          buffetMenu: {
+            connect: {
+              id: otherData.buffetMenu,
+            },
+          },
+          bookingsForChildren: {
+            create: bookingsForChildren.reduce(
+              (
+                prevs: { quantity: number; childrenCategoryId: string }[],
+                curr
+              ) => {
+                if (curr.quantity > 0) {
+                  return [
+                    ...prevs,
+                    {
+                      quantity: curr.quantity,
+                      childrenCategoryId: curr.childrenCategoryId,
+                    },
+                  ];
+                }
+                return prevs;
+              },
+              []
+            ),
+          },
+          bookingStatus: {
+            connect: {
+              step: 2,
+            },
+          },
+          invoicePrice: {
+            create: {
+              price: total,
+              VAT: {
+                connect: {
+                  tax: 5,
+                },
+              },
+            },
+          },
+        },
+      });
+      return;
+    }
 
     await this.prisma.booking.create({
       data: {
@@ -154,6 +203,11 @@ class BookingService {
                 tax: 5,
               },
             },
+          },
+        },
+        user: {
+          connect: {
+            id: userId,
           },
         },
       },

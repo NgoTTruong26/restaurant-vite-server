@@ -80,7 +80,7 @@ class AuthController {
     }
   };
 
-  profile = async (req: IAuthRequest<IAuthDecodeToken>, res: Response) => {
+  profile = async (req: IAuthRequest<IPayloadAuthToken>, res: Response) => {
     const userId = req.user?.userId;
 
     if (!userId) {
@@ -135,6 +135,20 @@ class AuthController {
         .status(StatusCodes.BAD_REQUEST)
         .send(errorResponse(StatusCodes.BAD_REQUEST, "Refresh token invalid"));
     }
+  };
+
+  getBookings = async (req: IAuthRequest<IPayloadAuthToken>, res: Response) => {
+    if (!req.user?.userId) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(
+          errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
+        );
+    }
+
+    const bookings = await this.authService.getBookings(req.user?.userId);
+
+    return res.send(successResponse(bookings, "Successfully"));
   };
 }
 
