@@ -3,10 +3,11 @@ import { IBodyResponse } from "../interfaces/response.interface";
 
 export function successResponse<T>(
   data: T,
-  message = "Success"
+  message = "Success",
+  status = StatusCodes.OK
 ): IBodyResponse<T> {
   return {
-    status: StatusCodes.OK,
+    status,
     message,
     data,
   };

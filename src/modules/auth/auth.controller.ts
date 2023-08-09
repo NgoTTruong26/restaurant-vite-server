@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import {
   IAuthRequest,
   IBodyRequest,
@@ -11,7 +11,6 @@ import { errorResponse, successResponse } from "../../helpers/response.helper";
 import * as tokenService from "../../services/token.service";
 import { SignUpDTO } from "./dto/sign-up.dto";
 import { RefreshTokenDTO } from "./dto/refresh-token.dto";
-import jwt from "jsonwebtoken";
 import {
   IAuthDecodeToken,
   IPayloadAuthToken,

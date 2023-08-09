@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { errorResponse } from "../helpers/response.helper";
+import { errorResponse, successResponse } from "../helpers/response.helper";
 import { IAuthDecodeToken } from "../interfaces/token.interfaces";
 import jwt from "jsonwebtoken";
 import {
@@ -41,8 +41,6 @@ class Verify {
       }
 
       if (!(decode as IAuthDecodeToken).userId) {
-        req.user = undefined;
-
         return res
           .status(StatusCodes.UNAUTHORIZED)
           .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
@@ -61,20 +59,16 @@ class Verify {
   ) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-      req.user = undefined;
-
       return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .send(
-          errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
-        );
+        .status(StatusCodes.OK)
+        .send(successResponse(null, "", StatusCodes.UNAUTHORIZED));
     }
 
     jwt.verify(token, process.env.JWT_SECRET!, (err, decode) => {
       if (err) {
         return res
-          .status(StatusCodes.UNAUTHORIZED)
-          .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
+          .status(StatusCodes.OK)
+          .send(successResponse(null, "", StatusCodes.UNAUTHORIZED));
       }
 
       if (!(decode as IAuthDecodeToken).userId) {
@@ -100,10 +94,8 @@ class Verify {
 
     if (!refreshToken)
       return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .send(
-          errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
-        );
+        .status(StatusCodes.FORBIDDEN)
+        .send(errorResponse(StatusCodes.FORBIDDEN, "You are not authorized"));
 
     jwt.verify(refreshToken, process.env.JWT_SECRET!, (err, decode) => {
       if (err) {
@@ -115,23 +107,17 @@ class Verify {
         }
 
         return res
-          .status(StatusCodes.UNAUTHORIZED)
+          .status(StatusCodes.FORBIDDEN)
           .send(
-            errorResponse(
-              StatusCodes.UNAUTHORIZED,
-              "Refresh Token is not valid"
-            )
+            errorResponse(StatusCodes.FORBIDDEN, "Refresh Token is not valid")
           );
       }
 
       if (!(decode as IAuthDecodeToken).userId)
         return res
-          .status(StatusCodes.UNAUTHORIZED)
+          .status(StatusCodes.FORBIDDEN)
           .send(
-            errorResponse(
-              StatusCodes.UNAUTHORIZED,
-              "Refresh Token is not valid"
-            )
+            errorResponse(StatusCodes.FORBIDDEN, "Refresh Token is not valid")
           );
 
       req.user = decode as IAuthDecodeToken;
