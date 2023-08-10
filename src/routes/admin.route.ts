@@ -18,6 +18,7 @@ class AdminRoute extends BaseRoute {
   initializeRoutesDish(): void {
     this.router
       .post("/create-vat", this.adminController.DishController.createVAT)
+      .post("/create-genders", this.adminController.createGenders)
       .post(
         "/create-buffet-menu",
         this.adminController.DishController.createBuffetMenu

@@ -46,6 +46,15 @@ class AdminController {
     }
   };
 
+  createGenders = async (req: Request, res: Response) => {
+    try {
+      const news = await this.adminService.createGenders();
+      res.send(successResponse(news, "success"));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   createManyNews = async (req: Request, res: Response) => {
     try {
       const news = await this.adminService.createManyNews();

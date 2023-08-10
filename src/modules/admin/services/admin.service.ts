@@ -35,6 +35,22 @@ class AdminService {
     return admin;
   };
 
+  createGenders = async () => {
+    await this.prisma.gender.createMany({
+      data: [
+        {
+          gender: "male",
+        },
+        {
+          gender: "female",
+        },
+        {
+          gender: "other",
+        },
+      ],
+    });
+  };
+
   createManyNews = async () => {
     const newsPreview = await this.prisma.news.createMany({
       data: [
