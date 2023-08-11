@@ -51,6 +51,31 @@ class AuthService {
     return user;
   };
 
+  getProfileCheckAuth = async (
+    userId?: string
+  ): Promise<Pick<ResponseUserDTO, "id" | "lastName" | "firstName"> | null> => {
+    if (!userId) {
+      return null;
+    }
+
+    const data = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        lastName: true,
+        firstName: true,
+      },
+    });
+
+    if (!data) {
+      return null;
+    }
+
+    return data;
+  };
+
   getProfile = async (userId?: string): Promise<ResponseUserDTO | null> => {
     if (!userId) {
       return null;
@@ -59,6 +84,14 @@ class AuthService {
     const data = await this.prisma.user.findUnique({
       where: {
         id: userId,
+      },
+      include: {
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
       },
     });
 

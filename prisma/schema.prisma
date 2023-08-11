@@ -21,12 +21,13 @@ model User {
   username               String         @unique @db.VarChar(255)
   firstName              String         @db.VarChar(255)
   lastName               String         @db.VarChar(255)
-  dateBirth              String?
+  dateBirth              DateTime?
   gender                 Gender?        @relation(fields: [genderId], references: [id])
   genderId               String?
   email                  String?        @unique @db.VarChar(255)
   password               String         @db.VarChar(255)
   phone                  String?        @unique @db.VarChar(255)
+  nationality            String?
   bookings               Booking[]
   refreshTokens          RefreshToken[]
   acceptTermsAndServices Boolean        @default(true)
@@ -45,7 +46,7 @@ model RefreshTokenForAdmin {
 
 model Gender {
   id     String @id @default(cuid())
-  gender String @db.VarChar(255)
+  gender String @unique @db.VarChar(255)
   users  User[]
 
   createdAt DateTime @default(now())

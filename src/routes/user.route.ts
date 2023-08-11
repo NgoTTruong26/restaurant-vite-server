@@ -24,9 +24,9 @@ class UserRoute extends BaseRoute {
         this.userController.createUser
       )
       .put(
-        "/users",
-        validate(this.userValidation.updateUser.body),
-        this.userController.updateUser
+        "/users/update-profile",
+        /* validate(this.userValidation.updateUser.body), */
+        this.userController.updateProfileUser
       )
       .delete(
         "/users",

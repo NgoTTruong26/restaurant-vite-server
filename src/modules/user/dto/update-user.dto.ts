@@ -1,5 +1,20 @@
-import { CreateUserDTO } from "./create-user.dto";
-
-export interface UpdateUserDTO extends Omit<CreateUserDTO, "username"> {
+export class UpdateProfileDTO {
   id: string;
+  lastname?: string;
+  firstname?: string;
+  dateBirth?: string;
+  gender?: string;
+  nationality?: string;
+}
+
+export class DataUpdate {
+  lastName?: string;
+  firstName?: string;
+  dateBirth?: Date;
+  gender?: {
+    connect: {
+      gender: string;
+    };
+  };
+  nationality?: string;
 }

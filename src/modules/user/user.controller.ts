@@ -6,7 +6,7 @@ import {
   IParamsRequest,
 } from "../../interfaces/request.interfaces";
 import { CreateUserDTO } from "./dto/create-user.dto";
-import { UpdateUserDTO } from "./dto/update-user.dto";
+import { UpdateProfileDTO } from "./dto/update-user.dto";
 import { DeleteUserDTO } from "./dto/delete-user.dto";
 import { Prisma } from "@prisma/client";
 import getPrismaRequestError from "../../helpers/getPrismaRequestError.helper";
@@ -58,12 +58,35 @@ class UserController {
     }
   };
 
-  updateUser = async (
-    req: IBodyRequest<UpdateUserDTO, keyof UpdateUserDTO>,
+  updateProfileUser = async (
+    req: IBodyRequest<UpdateProfileDTO, keyof UpdateProfileDTO>,
     res: Response
   ) => {
     try {
-      const user = await this.userService.updateUser(req.body);
+      const user = await this.userService.updateProfileUser(req.body);
+      res.send(successResponse(user, "Updated successfully"));
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(
+            errorResponse(
+              StatusCodes.BAD_REQUEST,
+              getPrismaRequestError(error.code, error.meta?.target as any)
+            )
+          );
+      }
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(errorResponse(StatusCodes.BAD_REQUEST, "User not found"));
+    }
+  };
+  updateSecurityUser = async (
+    req: IBodyRequest<UpdateProfileDTO, keyof UpdateProfileDTO>,
+    res: Response
+  ) => {
+    try {
+      const user = await this.userService.updateSecurityUser(req.body);
       res.send(successResponse(user, "Updated successfully"));
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
