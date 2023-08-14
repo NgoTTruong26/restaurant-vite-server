@@ -28,6 +28,11 @@ class UserRoute extends BaseRoute {
         /* validate(this.userValidation.updateUser.body), */
         this.userController.updateProfileUser
       )
+      .put(
+        "/users/change-password",
+        /* validate(this.userValidation.updateUser.body), */
+        this.userController.changePassword
+      )
       .delete(
         "/users",
         validate(this.userValidation.deleteUser.body),

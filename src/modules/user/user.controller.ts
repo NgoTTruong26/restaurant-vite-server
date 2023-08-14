@@ -6,7 +6,7 @@ import {
   IParamsRequest,
 } from "../../interfaces/request.interfaces";
 import { CreateUserDTO } from "./dto/create-user.dto";
-import { UpdateProfileDTO } from "./dto/update-user.dto";
+import { ChangePasswordDTO, UpdateProfileDTO } from "./dto/update-user.dto";
 import { DeleteUserDTO } from "./dto/delete-user.dto";
 import { Prisma } from "@prisma/client";
 import getPrismaRequestError from "../../helpers/getPrismaRequestError.helper";
@@ -102,6 +102,23 @@ class UserController {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(errorResponse(StatusCodes.BAD_REQUEST, "User not found"));
+    }
+  };
+
+  changePassword = async (
+    req: IBodyRequest<ChangePasswordDTO, keyof ChangePasswordDTO>,
+    res: Response
+  ) => {
+    try {
+      const user = await this.userService.changePassword(req.body);
+
+      res.send(successResponse(user, ""));
+    } catch (error) {
+      console.log(error);
+
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(errorResponse(StatusCodes.BAD_REQUEST, "Bad Request"));
     }
   };
 

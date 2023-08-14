@@ -133,9 +133,7 @@ class Verify {
     res: Response,
     next: NextFunction
   ) => {
-    return this.verifyAccessToken(req, res, () => {
-      console.log(req.user);
-    });
+    return this.verifyAccessToken(req, res, () => {});
   };
 
   verifyBooking = (

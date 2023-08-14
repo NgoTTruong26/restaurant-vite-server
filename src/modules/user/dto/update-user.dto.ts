@@ -18,3 +18,9 @@ export class DataUpdate {
   };
   nationality?: string;
 }
+
+export class ChangePasswordDTO {
+  id: string;
+  password: string;
+  newPassword: string;
+}

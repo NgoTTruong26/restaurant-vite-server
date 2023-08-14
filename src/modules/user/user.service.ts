@@ -2,10 +2,15 @@ import { PrismaClient, User } from "@prisma/client";
 import { encrypt } from "../../helpers/encryption.utils";
 import { CreateUserDTO } from "./dto/create-user.dto";
 import { ResponseUserDTO } from "./dto/response.dto";
-import { DataUpdate, UpdateProfileDTO } from "./dto/update-user.dto";
+import {
+  ChangePasswordDTO,
+  DataUpdate,
+  UpdateProfileDTO,
+} from "./dto/update-user.dto";
 import { DeleteUserDTO } from "./dto/delete-user.dto";
 import prismaClient from "../../configs/prisma.config";
 import exclude from "../../configs/exclude.config";
+import { compare } from "bcryptjs";
 
 class UserService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -74,6 +79,14 @@ class UserService {
         ...dataUpdate,
       },
       where: { id: payload.id },
+      include: {
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
+      },
     });
 
     return user;
@@ -94,6 +107,40 @@ class UserService {
     });
 
     return user;
+  };
+
+  changePassword = async (
+    payload: ChangePasswordDTO
+  ): Promise<ResponseUserDTO> => {
+    const currentPassword = (
+      await this.prisma.user.findUnique({
+        where: {
+          id: payload.id,
+        },
+        select: {
+          password: true,
+        },
+      })
+    )?.password;
+
+    if (!currentPassword) {
+      throw new Error();
+    }
+
+    if (!(await compare(payload.password, currentPassword))) {
+      throw new Error();
+    }
+
+    const data = await this.prisma.user.update({
+      where: {
+        id: payload.id,
+      },
+      data: {
+        password: await encrypt(payload.newPassword),
+      },
+    });
+
+    return data;
   };
 
   deleteUser = async ({

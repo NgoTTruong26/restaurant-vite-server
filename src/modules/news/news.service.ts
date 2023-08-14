@@ -45,8 +45,6 @@ class NewsService {
 
       const _count = await this.prisma.news.count();
 
-      console.log(await this.prisma.news.count());
-
       return {
         newsList,
         nextPage:
