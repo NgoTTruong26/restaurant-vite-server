@@ -24,6 +24,26 @@ class DishService {
     });
   };
 
+  createBookingStatus = async () => {
+    await this.prisma.bookingStatus.createMany({
+      data: [
+        /*  {
+          name: "Tạo yêu cầu thành công",
+          step: 1,
+        },
+        {
+          name: "Chờ xác nhận",
+          step: 2,
+        },
+        {
+          name: "Thành công",
+          step: 3,
+        }, */
+        { name: "Đã xác nhận", step: 3 },
+      ],
+    });
+  };
+
   createBuffetMenu = async (
     payload: CreateBuffetMenuDTO
   ): Promise<ResponseDishDTO<BuffetMenu>> => {

@@ -25,6 +25,15 @@ class DishController {
     this.DishService = new DishService();
   }
 
+  createBookingStatus = async (req: Request, res: Response) => {
+    try {
+      const bookingStatus = await this.DishService.createBookingStatus();
+      res.send(successResponse(bookingStatus, "Success"));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   createVAT = async (req: Request, res: Response) => {
     try {
       await this.DishService.createVAT();

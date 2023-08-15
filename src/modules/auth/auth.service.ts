@@ -186,6 +186,7 @@ class AuthService {
             },
           },
         },
+        cancellation: true,
       },
       orderBy: {
         createdAt: "desc",

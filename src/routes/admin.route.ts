@@ -18,7 +18,10 @@ class AdminRoute extends BaseRoute {
   initializeRoutesDish(): void {
     this.router
       .post("/create-vat", this.adminController.DishController.createVAT)
-      .post("/create-genders", this.adminController.createGenders)
+      .post(
+        "/create-booking-status",
+        this.adminController.DishController.createBookingStatus
+      )
       .post(
         "/create-buffet-menu",
         this.adminController.DishController.createBuffetMenu
@@ -46,6 +49,7 @@ class AdminRoute extends BaseRoute {
     this.router
       .post("/", this.adminController.createAdmin)
       .post("/create-many-news", this.adminController.createManyNews)
+      .post("/create-genders", this.adminController.createGenders)
       .get("/get-admin-by-roles", this.adminController.getAdminByRole);
   }
 }

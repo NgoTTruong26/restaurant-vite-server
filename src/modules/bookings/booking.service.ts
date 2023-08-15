@@ -86,6 +86,7 @@ class BookingService {
               },
             },
           },
+          cancellation: true,
         },
         orderBy: {
           createdAt: "desc",
@@ -226,25 +227,6 @@ class BookingService {
       },
     });
     return bookingStatus;
-  };
-
-  createBookingStatus = async () => {
-    await this.prisma.bookingStatus.createMany({
-      data: [
-        {
-          name: "Tạo yêu cầu thành công",
-          step: 1,
-        },
-        {
-          name: "Chờ xác nhận",
-          step: 2,
-        },
-        {
-          name: "Thành công",
-          step: 3,
-        },
-      ],
-    });
   };
 }
 

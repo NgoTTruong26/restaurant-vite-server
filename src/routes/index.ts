@@ -1,10 +1,10 @@
 import express from "express";
-import userRoute from "./user.route";
 import authRoute from "./auth.route";
 import adminRoute from "./admin.route";
 import dishRouter from "./dish.router";
 import NewsRoute from "./news.route";
 import BookingRoute from "./booking.route";
+import UserRoute from "./user.route";
 
 interface IRoute {
   path: string;
@@ -12,6 +12,8 @@ interface IRoute {
 }
 
 const router = express.Router();
+
+const userRoute = new UserRoute();
 
 const newsRoute = new NewsRoute();
 

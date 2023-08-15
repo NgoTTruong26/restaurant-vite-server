@@ -17,12 +17,12 @@ class UserRoute extends BaseRoute {
   initializeRoutes(): void {
     this.router
       .get("/users", this.userController.getUsers)
-      .get("/users/:userId", this.userController.getUser)
       .post(
         "/users",
         validate(this.userValidation.createUser.body),
         this.userController.createUser
       )
+      .get("/users/:userId", this.userController.getUser)
       .put(
         "/users/update-profile",
         /* validate(this.userValidation.updateUser.body), */
@@ -41,4 +41,4 @@ class UserRoute extends BaseRoute {
   }
 }
 
-export default new UserRoute();
+export default UserRoute;

@@ -11,10 +11,11 @@ class DishRoute extends BaseRoute {
   }
 
   protected initializeRoutes(): void {
-    this.router.get("/list-buffet-menu", this.dishController.getManyBuffetMenu);
-    this.router.get("/buffet-menu/:id", this.dishController.getBuffetMenu);
-    this.router.get("/dishes-preview", this.dishController.getDishPreview);
-    this.router.get("/dishes", this.dishController.getDishes);
+    this.router
+      .get("/list-buffet-menu", this.dishController.getManyBuffetMenu)
+      .get("/buffet-menu/:id", this.dishController.getBuffetMenu)
+      .get("/dishes-preview", this.dishController.getDishPreview)
+      .get("/dishes", this.dishController.getDishes);
   }
 }
 

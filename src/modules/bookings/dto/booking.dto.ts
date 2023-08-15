@@ -2,6 +2,17 @@ import { GetBuffetMenuDTO } from "../../dish/dto/get-dishes.dto";
 import { GetBookingStatusDTO } from "./get-booking-status.dto";
 import { GetChildrenCategoryDTO } from "./get-children-category.dto";
 
+export class GetVATDTO {
+  id: string;
+  tax: number;
+}
+
+export class GetInvoicePriceDTO {
+  id: string;
+  price: number;
+  VAT: GetVATDTO;
+}
+
 class CreateBookingsForChildren {
   childrenCategoryId: string;
   childrenCategory: string;
@@ -21,7 +32,7 @@ export class CreateBookingDTO {
   bookingsForChildren: CreateBookingsForChildren[];
 }
 
-class GetBookingsForChildren {
+export class GetBookingsForChildren {
   id: string;
   childrenCategory: GetChildrenCategoryDTO;
   quantity: number;
@@ -38,4 +49,6 @@ export class GetBookingDTO {
   buffetMenu: GetBuffetMenuDTO;
   bookingsForChildren: GetBookingsForChildren[];
   bookingStatus: GetBookingStatusDTO;
+  invoicePrice: GetInvoicePriceDTO;
+  cancellation: boolean;
 }

@@ -75,15 +75,6 @@ class BookingController {
       console.log(error);
     }
   };
-
-  createBookingStatus = async (req: Request, res: Response) => {
-    try {
-      const bookingStatus = await this.bookingService.createBookingStatus();
-      res.send(successResponse(bookingStatus, "Success"));
-    } catch (error) {
-      console.log(error);
-    }
-  };
 }
 
 export default BookingController;
