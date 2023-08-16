@@ -23,7 +23,6 @@ class BookingService {
   getOneBooking = async (
     query: GetOneBookingDTO
   ): Promise<GetBookingDTO | null> => {
-    console.log(query.get_booking);
     if (!query.get_booking) {
       return null;
     }
