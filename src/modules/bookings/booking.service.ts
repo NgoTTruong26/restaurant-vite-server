@@ -86,6 +86,13 @@ class BookingService {
             },
           },
           cancellation: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",
@@ -96,7 +103,7 @@ class BookingService {
     return booking;
   };
 
-  createBooking = async (data: CreateBookingDTO): Promise<void> => {
+  createBooking = async (data: CreateBookingDTO): Promise<GetBookingDTO> => {
     const { bookingsForChildren, userId, ...otherData } = data;
 
     const buffetMenu = await this.prisma.buffetMenu.findUnique({
@@ -114,7 +121,7 @@ class BookingService {
     }, buffetMenu.price * otherData.numberPeople);
 
     if (!userId) {
-      await this.prisma.booking.create({
+      const booking = await this.prisma.booking.create({
         data: {
           ...otherData,
           buffetMenu: {
@@ -158,11 +165,69 @@ class BookingService {
             },
           },
         },
+        select: {
+          id: true,
+          phoneNumber: true,
+          author: true,
+          bookingTime: true,
+          bookingDate: true,
+          numberPeople: true,
+          note: true,
+          bookingsForChildren: {
+            select: {
+              id: true,
+              childrenCategory: {
+                select: {
+                  id: true,
+                  category: true,
+                  deals: true,
+                },
+              },
+              quantity: true,
+            },
+          },
+          buffetMenu: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              image: true,
+              special: true,
+            },
+          },
+          bookingStatus: {
+            select: {
+              id: true,
+              name: true,
+              step: true,
+            },
+          },
+          invoicePrice: {
+            select: {
+              id: true,
+              price: true,
+              VAT: {
+                select: {
+                  id: true,
+                  tax: true,
+                },
+              },
+            },
+          },
+          cancellation: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
       });
-      return;
+      return booking;
     }
 
-    await this.prisma.booking.create({
+    const booking = await this.prisma.booking.create({
       data: {
         ...otherData,
         buffetMenu: {
@@ -211,7 +276,67 @@ class BookingService {
           },
         },
       },
+      select: {
+        id: true,
+        phoneNumber: true,
+        author: true,
+        bookingTime: true,
+        bookingDate: true,
+        numberPeople: true,
+        note: true,
+        bookingsForChildren: {
+          select: {
+            id: true,
+            childrenCategory: {
+              select: {
+                id: true,
+                category: true,
+                deals: true,
+              },
+            },
+            quantity: true,
+          },
+        },
+        buffetMenu: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            image: true,
+            special: true,
+          },
+        },
+        bookingStatus: {
+          select: {
+            id: true,
+            name: true,
+            step: true,
+          },
+        },
+        invoicePrice: {
+          select: {
+            id: true,
+            price: true,
+            VAT: {
+              select: {
+                id: true,
+                tax: true,
+              },
+            },
+          },
+        },
+        cancellation: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
+
+    return booking;
   };
 
   getBookingStatus = async (): Promise<GetBookingStatusDTO[]> => {

@@ -44,9 +44,9 @@ class BookingController {
     res: Response
   ) => {
     try {
-      await this.bookingService.createBooking(req.body);
+      const booking = await this.bookingService.createBooking(req.body);
 
-      res.send(successResponse(null, "Created success"));
+      res.send(successResponse(booking, "Created success"));
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         console.log(error);

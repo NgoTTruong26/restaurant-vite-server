@@ -51,4 +51,9 @@ export class GetBookingDTO {
   bookingStatus: GetBookingStatusDTO;
   invoicePrice: GetInvoicePriceDTO;
   cancellation: boolean;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  } | null;
 }

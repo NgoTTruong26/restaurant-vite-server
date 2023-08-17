@@ -187,6 +187,13 @@ class AuthService {
           },
         },
         cancellation: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
