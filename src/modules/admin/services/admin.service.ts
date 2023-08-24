@@ -2,8 +2,13 @@ import { Admin, PrismaClient } from "@prisma/client";
 import { CreateAdminDTO } from "../dto/admin.dto";
 import { encrypt } from "../../../helpers/encryption.utils";
 import { ResponseAdminDTO } from "../dto/response.dto";
-import { GetAdminsByRoleDTO } from "../dto/get-admins.dto";
+import {
+  GetAdminDTO,
+  GetAdminListDTO,
+  GetAdminsByRoleDTO,
+} from "../dto/get-admins.dto";
 import prismaClient from "../../../configs/prisma.config";
+import { GetRoleDTO, GetRoleListDTO } from "../dto/get-roles.dto";
 
 class AdminService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -67,6 +72,22 @@ class AdminService {
     return newsPreview;
   };
 
+  getRoles = async (): Promise<GetRoleListDTO> => {
+    const roles = await this.prisma.role.findMany({
+      select: {
+        id: true,
+        position: true,
+      },
+    });
+
+    const total = await this.prisma.role.count();
+
+    return {
+      roles,
+      total,
+    };
+  };
+
   getAdminByRole = async (
     payload: GetAdminsByRoleDTO
   ): Promise<ResponseAdminDTO[]> => {
@@ -83,6 +104,50 @@ class AdminService {
     });
 
     return admins;
+  };
+
+  getAdminList = async (page: string): Promise<GetAdminListDTO> => {
+    const limit = 5;
+
+    const total = await this.prisma.admin.count();
+
+    const totalPages = Math.ceil(total / limit);
+
+    if (parseInt(page) > totalPages) {
+      throw new Error();
+    }
+
+    const adminList = await this.prisma.admin.findMany({
+      skip: (parseInt(page) - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        roles: {
+          select: {
+            role: {
+              select: {
+                id: true,
+                position: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      adminList,
+      page: parseInt(page),
+      totalPages,
+      previousPage: parseInt(page) > 0 ? parseInt(page) - 1 : null,
+      nextPage: total > parseInt(page) * limit ? parseInt(page) + 1 : null,
+      total,
+    };
   };
 }
 

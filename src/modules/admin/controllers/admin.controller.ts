@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
-import { IBodyRequest } from "../../../interfaces/request.interfaces";
+import {
+  IBodyRequest,
+  IQueryRequest,
+} from "../../../interfaces/request.interfaces";
 import { CreateAdminDTO } from "../dto/admin.dto";
 import { StatusCodes } from "http-status-codes";
 import AdminService from "../services/admin.service";
@@ -11,6 +14,7 @@ import { Prisma } from "@prisma/client";
 import getPrismaRequestError from "../../../helpers/getPrismaRequestError.helper";
 import { GetAdminsByRoleDTO } from "../dto/get-admins.dto";
 import DishController from "./dish.admin.controller";
+import { GetAdminListQueryDTO } from "../dto/get-admin-query.dto";
 
 class AdminController {
   private adminService: AdminService;
@@ -64,6 +68,17 @@ class AdminController {
     }
   };
 
+  getRoles = async (req: Request, res: Response) => {
+    try {
+      const data = await this.adminService.getRoles();
+      res.send(successResponse(data, "Success"));
+    } catch (error) {
+      console.log(error);
+
+      res.status(StatusCodes.BAD_REQUEST).send("Bad Request");
+    }
+  };
+
   getAdminByRole = async (
     req: IBodyRequest<GetAdminsByRoleDTO, keyof GetAdminsByRoleDTO>,
     res: Response
@@ -71,6 +86,20 @@ class AdminController {
     try {
       const data = await this.adminService.getAdminByRole(req.body);
       res.send(data);
+    } catch (error) {
+      console.log(error);
+
+      res.status(StatusCodes.BAD_REQUEST).send("Bad Request");
+    }
+  };
+
+  getAdminList = async (
+    req: IQueryRequest<GetAdminListQueryDTO>,
+    res: Response
+  ) => {
+    try {
+      const data = await this.adminService.getAdminList(req.query.page);
+      res.send(successResponse(data, "Success"));
     } catch (error) {
       console.log(error);
 
