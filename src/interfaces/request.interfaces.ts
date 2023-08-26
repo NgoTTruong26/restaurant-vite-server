@@ -6,6 +6,11 @@ export interface IBodyRequest<T, K extends keyof T>
   body: Pick<T, K>;
 }
 
+export interface IParamsRequestVerifyAdmin<T, R> extends Omit<Request, "body"> {
+  params: T & ParamsDictionary;
+  user?: R;
+}
+
 export interface IBodyRequestVerifyCheckUser<B, T>
   extends Omit<IAuthRequest<T>, "body"> {
   body: B;

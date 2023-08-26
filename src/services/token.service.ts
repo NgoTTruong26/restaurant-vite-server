@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { ResponseUserDTO } from "../modules/user/dto/response.dto";
 import prisma from "../configs/prisma.config";
 import { IPayloadAuthToken } from "../interfaces/token.interfaces";
+import { ResponseAdminDTO } from "../modules/admin/dto/response.dto";
 
 interface AuthTokensResponse {
   accessToken: string;
@@ -57,4 +58,23 @@ const generateAuthTokens = async (
   };
 };
 
-export { generateToken, generateAuthTokens, generateAuthRefreshToken };
+const generateAdminAuthTokens = async (
+  user: ResponseAdminDTO
+): Promise<AuthTokensResponse> => {
+  const accessToken = generateToken({ userId: user.id });
+
+  const refreshToken =
+    await "a"; /* generateAuthRefreshToken({ userId: user.id }); */
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
+
+export {
+  generateToken,
+  generateAuthTokens,
+  generateAuthRefreshToken,
+  generateAdminAuthTokens,
+};

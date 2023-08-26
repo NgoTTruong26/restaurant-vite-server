@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   IBodyRequest,
+  IParamsRequestVerifyAdmin,
   IQueryRequest,
 } from "../../../interfaces/request.interfaces";
 import { CreateAdminDTO } from "../dto/admin.dto";
@@ -15,14 +16,19 @@ import getPrismaRequestError from "../../../helpers/getPrismaRequestError.helper
 import { GetAdminsByRoleDTO } from "../dto/get-admins.dto";
 import DishController from "./dish.admin.controller";
 import { GetAdminListQueryDTO } from "../dto/get-admin-query.dto";
+import { IPayloadAuthToken } from "../../../interfaces/token.interfaces";
+import { GetAdminParamsDTO } from "../dto/get-admin-params.dto";
+import AdminAuthController from "./adminAuth.controller";
 
 class AdminController {
   private adminService: AdminService;
   readonly DishController: DishController;
+  readonly AdminAuthController: AdminAuthController;
 
   constructor() {
     this.adminService = new AdminService();
     this.DishController = new DishController();
+    this.AdminAuthController = new AdminAuthController();
   }
 
   createAdmin = async (
@@ -79,13 +85,13 @@ class AdminController {
     }
   };
 
-  getAdminByRole = async (
-    req: IBodyRequest<GetAdminsByRoleDTO, keyof GetAdminsByRoleDTO>,
+  getAdminList = async (
+    req: IQueryRequest<GetAdminListQueryDTO>,
     res: Response
   ) => {
     try {
-      const data = await this.adminService.getAdminByRole(req.body);
-      res.send(data);
+      const data = await this.adminService.getAdminList(req.query);
+      res.send(successResponse(data, "Success"));
     } catch (error) {
       console.log(error);
 
@@ -93,17 +99,28 @@ class AdminController {
     }
   };
 
-  getAdminList = async (
-    req: IQueryRequest<GetAdminListQueryDTO>,
+  getAdminById = async (
+    req: IParamsRequestVerifyAdmin<GetAdminParamsDTO, IPayloadAuthToken>,
     res: Response
   ) => {
     try {
-      const data = await this.adminService.getAdminList(req.query.page);
+      if (!req.user?.userId) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .send(
+            errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
+          );
+      }
+
+      const data = await this.adminService.getAdminById(
+        req.params.id,
+        req.user.userId
+      );
       res.send(successResponse(data, "Success"));
     } catch (error) {
       console.log(error);
 
-      res.status(StatusCodes.BAD_REQUEST).send("Bad Request");
+      res.status(StatusCodes.FORBIDDEN).send("Forbidden");
     }
   };
 }

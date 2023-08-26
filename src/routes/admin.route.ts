@@ -1,12 +1,15 @@
+import Verify from "../middlewares/verify.middleware";
 import AdminController from "../modules/admin/controllers/admin.controller";
 import BaseRoute from "./base.route";
 
 class AdminRoute extends BaseRoute {
   private adminController: AdminController;
+  private verify: Verify;
 
   constructor() {
     super();
     this.adminController = new AdminController();
+    this.verify = new Verify();
     this.initializeRoutes();
   }
 
@@ -50,8 +53,13 @@ class AdminRoute extends BaseRoute {
       .post("/", this.adminController.createAdmin)
       .post("/create-many-news", this.adminController.createManyNews)
       .post("/create-genders", this.adminController.createGenders)
+      .post("/sign-in", this.adminController.AdminAuthController.signIn)
       .get("/", this.adminController.getAdminList)
-      .get("/get-admin-by-roles", this.adminController.getAdminByRole)
+      .get(
+        "/:id",
+        this.verify.verifyAccessToken,
+        this.adminController.getAdminById
+      )
       .get("/get-roles", this.adminController.getRoles);
   }
 }

@@ -9,6 +9,7 @@ import {
 } from "../dto/get-admins.dto";
 import prismaClient from "../../../configs/prisma.config";
 import { GetRoleDTO, GetRoleListDTO } from "../dto/get-roles.dto";
+import { GetAdminListQueryDTO } from "../dto/get-admin-query.dto";
 
 class AdminService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -82,34 +83,34 @@ class AdminService {
 
     const total = await this.prisma.role.count();
 
+    const totalAdmin = await this.prisma.admin.count();
+
     return {
       roles,
       total,
+      totalAdmin,
     };
   };
 
-  getAdminByRole = async (
-    payload: GetAdminsByRoleDTO
-  ): Promise<ResponseAdminDTO[]> => {
-    const admins = await this.prisma.admin.findMany({
-      where: {
-        roles: {
-          some: {
-            role: {
-              position: payload.position,
-            },
-          },
-        },
-      },
-    });
-
-    return admins;
-  };
-
-  getAdminList = async (page: string): Promise<GetAdminListDTO> => {
+  getAdminList = async ({
+    page = "1",
+    role,
+  }: GetAdminListQueryDTO): Promise<GetAdminListDTO> => {
     const limit = 5;
 
-    const total = await this.prisma.admin.count();
+    const total = role
+      ? await this.prisma.admin.count({
+          where: {
+            roles: {
+              some: {
+                role: {
+                  position: role,
+                },
+              },
+            },
+          },
+        })
+      : await this.prisma.admin.count();
 
     const totalPages = Math.ceil(total / limit);
 
@@ -120,6 +121,15 @@ class AdminService {
     const adminList = await this.prisma.admin.findMany({
       skip: (parseInt(page) - 1) * limit,
       take: limit,
+      where: {
+        roles: {
+          some: {
+            role: {
+              position: role,
+            },
+          },
+        },
+      },
       select: {
         id: true,
         username: true,
@@ -146,8 +156,58 @@ class AdminService {
       totalPages,
       previousPage: parseInt(page) > 0 ? parseInt(page) - 1 : null,
       nextPage: total > parseInt(page) * limit ? parseInt(page) + 1 : null,
-      total,
     };
+  };
+
+  getAdminById = async (
+    idAdmin: string,
+    idAuth: string
+  ): Promise<GetAdminDTO | null> => {
+    const adminAuth = await this.prisma.admin.findUnique({
+      where: {
+        id: idAuth,
+        roles: {
+          some: {
+            role: {
+              position: "admin",
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!adminAuth) {
+      throw new Error();
+    }
+
+    const admin = await this.prisma.admin.findUnique({
+      where: {
+        id: idAdmin,
+      },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        roles: {
+          select: {
+            role: {
+              select: {
+                id: true,
+                position: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return admin;
   };
 }
 
