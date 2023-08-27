@@ -3,7 +3,7 @@ import {
   IBodyRequest,
   IParamsRequestVerifyAdmin,
   IQueryRequest,
-} from "../../../interfaces/request.interfaces";
+} from "../../../interfaces/request.interface";
 import { CreateAdminDTO } from "../dto/admin.dto";
 import { StatusCodes } from "http-status-codes";
 import AdminService from "../services/admin.service";

@@ -3,11 +3,12 @@ import { errorResponse, successResponse } from "../helpers/response.helper";
 import { IAuthDecodeToken } from "../interfaces/token.interfaces";
 import jwt from "jsonwebtoken";
 import {
+  IAdminAuthRequest,
   IAuthRequest,
   IBodyRequest,
   IBodyRequestVerifyCheckUser,
   IRefreshTokenRequest,
-} from "../interfaces/request.interfaces";
+} from "../interfaces/request.interface";
 import { StatusCodes } from "http-status-codes";
 import { RefreshTokenDTO } from "../modules/auth/dto/refresh-token.dto";
 import { CreateBookingDTO } from "../modules/bookings/dto/booking.dto";
@@ -24,6 +25,40 @@ class Verify {
     next: NextFunction
   ) {
     const token = req.headers.authorization?.split(" ")[1];
+    if (!token)
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(
+          errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
+        );
+
+    jwt.verify(token, process.env.JWT_SECRET!, (err, decode) => {
+      if (err) {
+        console.log(err);
+
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
+      }
+
+      if (!(decode as IAuthDecodeToken).userId) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
+      }
+
+      req.user = decode as IAuthDecodeToken;
+
+      next();
+    });
+  }
+
+  adminVerifyAccessToken(
+    req: IAdminAuthRequest<IAuthDecodeToken>,
+    res: Response,
+    next: NextFunction
+  ) {
+    const token = req.headers.admin_authorization?.split(" ")[1];
     if (!token)
       return res
         .status(StatusCodes.UNAUTHORIZED)

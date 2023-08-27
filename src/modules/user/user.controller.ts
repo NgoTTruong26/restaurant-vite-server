@@ -4,7 +4,7 @@ import { errorResponse, successResponse } from "../../helpers/response.helper";
 import {
   IBodyRequest,
   IParamsRequest,
-} from "../../interfaces/request.interfaces";
+} from "../../interfaces/request.interface";
 import { CreateUserDTO } from "./dto/create-user.dto";
 import { ChangePasswordDTO, UpdateProfileDTO } from "./dto/update-user.dto";
 import { DeleteUserDTO } from "./dto/delete-user.dto";

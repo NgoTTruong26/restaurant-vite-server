@@ -10,7 +10,7 @@ import {
 } from "../../../helpers/response.helper";
 import { StatusCodes } from "http-status-codes";
 
-import { IBodyRequest } from "../../../interfaces/request.interfaces";
+import { IBodyRequest } from "../../../interfaces/request.interface";
 import DishService from "../services/dish.admin.service";
 import {
   ConnectDishes,

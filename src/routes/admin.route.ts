@@ -55,12 +55,12 @@ class AdminRoute extends BaseRoute {
       .post("/create-genders", this.adminController.createGenders)
       .post("/sign-in", this.adminController.AdminAuthController.signIn)
       .get("/", this.adminController.getAdminList)
+      .get("/get-roles", this.adminController.getRoles)
       .get(
-        "/:id",
-        this.verify.verifyAccessToken,
+        "/get-admin-by-id/:id",
+        this.verify.adminVerifyAccessToken,
         this.adminController.getAdminById
-      )
-      .get("/get-roles", this.adminController.getRoles);
+      );
   }
 }
 

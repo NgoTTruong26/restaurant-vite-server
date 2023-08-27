@@ -1,6 +1,6 @@
 import * as tokenService from "../../../services/token.service";
 
-import { IBodyRequest } from "../../../interfaces/request.interfaces";
+import { IBodyRequest } from "../../../interfaces/request.interface";
 import { signInDTO } from "../../auth/dto/sign-in.dto";
 import AdminAuthService from "../services/adminAuth.service";
 import { Response } from "express";
@@ -26,7 +26,7 @@ class AdminAuthController {
       const { accessToken, refreshToken } =
         await tokenService.generateAdminAuthTokens(admin);
 
-      res.cookie(process.env.REFRESH_TOKEN!, refreshToken, {
+      res.cookie(process.env.REFRESH_TOKEN_ADMIN!, refreshToken, {
         httpOnly: false,
         secure: false, // lúc deploy thì để true
         sameSite: "strict",

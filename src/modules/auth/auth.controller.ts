@@ -3,7 +3,7 @@ import {
   IAuthRequest,
   IBodyRequest,
   IRefreshTokenRequest,
-} from "../../interfaces/request.interfaces";
+} from "../../interfaces/request.interface";
 import AuthService from "./auth.service";
 import { signInDTO } from "./dto/sign-in.dto";
 import { StatusCodes } from "http-status-codes";

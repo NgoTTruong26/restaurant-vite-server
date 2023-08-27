@@ -7,7 +7,7 @@ import getPrismaRequestError from "../../helpers/getPrismaRequestError.helper";
 import {
   IBodyRequest,
   IQueryRequest,
-} from "../../interfaces/request.interfaces";
+} from "../../interfaces/request.interface";
 import { CreateBookingDTO } from "./dto/booking.dto";
 import { GetOneBookingDTO } from "./dto/get-booking-query.dto";
 

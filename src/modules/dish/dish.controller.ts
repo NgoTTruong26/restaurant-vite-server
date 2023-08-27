@@ -4,7 +4,7 @@ import { successResponse } from "../../helpers/response.helper";
 import {
   IParamsRequest,
   IQueryRequest,
-} from "../../interfaces/request.interfaces";
+} from "../../interfaces/request.interface";
 import {
   GetBuffetMenuQueryDTO,
   GetDishesQueryDTO,

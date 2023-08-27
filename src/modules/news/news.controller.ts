@@ -5,7 +5,7 @@ import { GetLatestNewsDTO, GetNewsQueryDTO } from "./dto/get-news-query";
 import {
   IParamsRequest,
   IQueryRequest,
-} from "../../interfaces/request.interfaces";
+} from "../../interfaces/request.interface";
 import { GetPostDTO } from "./dto/get-post-params.dto";
 
 class NewsController {

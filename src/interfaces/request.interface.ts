@@ -1,5 +1,6 @@
 import { Request } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
+import { IHeadersAdminAuthRequest } from "./headers.interface";
 
 export interface IBodyRequest<T, K extends keyof T>
   extends Omit<Request, "body"> {
@@ -31,5 +32,10 @@ export interface IRefreshTokenRequest<T, R> extends Omit<Request, "cookies"> {
 }
 
 export interface IAuthRequest<T> extends Request {
+  user?: T;
+}
+
+export interface IAdminAuthRequest<T> extends Request {
+  headers: IHeadersAdminAuthRequest;
   user?: T;
 }
