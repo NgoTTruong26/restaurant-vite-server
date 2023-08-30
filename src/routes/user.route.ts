@@ -16,6 +16,7 @@ class UserRoute extends BaseRoute {
 
   initializeRoutes(): void {
     this.router
+      .get("/genders", this.userController.getGenders)
       .get("/users", this.userController.getUsers)
       .post(
         "/users",

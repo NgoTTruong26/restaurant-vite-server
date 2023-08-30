@@ -18,6 +18,11 @@ class UserController {
     this.userService = new UserService();
   }
 
+  getGenders = async (req: Request, res: Response) => {
+    const genders = await this.userService.getGenders();
+    res.send(successResponse(genders, "Success"));
+  };
+
   getUsers = async (req: Request, res: Response) => {
     const users = await this.userService.getUsers();
     res.status(StatusCodes.OK).send(users);

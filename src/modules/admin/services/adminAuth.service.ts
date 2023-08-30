@@ -18,12 +18,8 @@ class AdminAuthService {
       include: {
         roles: {
           select: {
-            role: {
-              select: {
-                id: true,
-                position: true,
-              },
-            },
+            id: true,
+            position: true,
           },
         },
       },

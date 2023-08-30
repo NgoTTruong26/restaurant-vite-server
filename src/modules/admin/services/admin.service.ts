@@ -1,15 +1,15 @@
-import { Admin, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { CreateAdminDTO } from "../dto/admin.dto";
 import { encrypt } from "../../../helpers/encryption.utils";
 import { ResponseAdminDTO } from "../dto/response.dto";
-import {
-  GetAdminDTO,
-  GetAdminListDTO,
-  GetAdminsByRoleDTO,
-} from "../dto/get-admins.dto";
+import { GetAdminDTO, GetAdminListDTO } from "../dto/get-admins.dto";
 import prismaClient from "../../../configs/prisma.config";
 import { GetRoleDTO, GetRoleListDTO } from "../dto/get-roles.dto";
 import { GetAdminListQueryDTO } from "../dto/get-admin-query.dto";
+import {
+  IDataUpdateRolesAdmin,
+  IUpdateRolesAdminDTO,
+} from "../dto/update-admin.dto";
 
 class AdminService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -22,17 +22,16 @@ class AdminService {
         ...data,
         password: await encrypt(reqPassword),
         roles: {
-          create: {
-            role: {
-              connect: {
-                id: "100364690328125440",
-              },
+          connect: [
+            {
+              id: "",
+              position: "",
             },
-            modifiedByAdmin: {
-              connect: {
-                id: "clitr86xz0008vv6ct6l73vcg",
-              },
-            },
+          ],
+        },
+        modifiedByAdmin: {
+          connect: {
+            id: "",
           },
         },
       },
@@ -73,6 +72,58 @@ class AdminService {
     return newsPreview;
   };
 
+  updateRolesAdmin = async (
+    payload: IDataUpdateRolesAdmin
+  ): Promise<GetAdminDTO> => {
+    console.log(payload.adminId);
+
+    const admin = await this.prisma.admin.update({
+      where: { id: payload.adminId },
+      data: {
+        roles: {
+          connect: payload.roles.reduce<{ id: string }[]>((prevs, curr) => {
+            if (typeof curr === "string") {
+              return [...prevs, { id: curr }];
+            }
+            return prevs;
+          }, []),
+          disconnect: payload.removeRoles
+            ? payload.removeRoles.map((role) => ({
+                id: role,
+              }))
+            : [],
+        },
+        modifiedByAdmin: {
+          connect: [{ id: payload.modifiedByAdminId }],
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        roles: {
+          select: {
+            id: true,
+            position: true,
+          },
+        },
+        dateBirth: true,
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
+        nationality: true,
+      },
+    });
+
+    return admin;
+  };
+
   getRoles = async (): Promise<GetRoleListDTO> => {
     const roles = await this.prisma.role.findMany({
       select: {
@@ -95,7 +146,7 @@ class AdminService {
   getAdminList = async ({
     page = "1",
     role,
-  }: GetAdminListQueryDTO): Promise<GetAdminListDTO> => {
+  }: GetAdminListQueryDTO): Promise<GetAdminListDTO | null> => {
     const limit = 5;
 
     const total = role
@@ -103,9 +154,7 @@ class AdminService {
           where: {
             roles: {
               some: {
-                role: {
-                  position: role,
-                },
+                position: role,
               },
             },
           },
@@ -114,6 +163,10 @@ class AdminService {
 
     const totalPages = Math.ceil(total / limit);
 
+    if (totalPages === 0) {
+      return null;
+    }
+
     if (parseInt(page) > totalPages) {
       throw new Error();
     }
@@ -121,15 +174,15 @@ class AdminService {
     const adminList = await this.prisma.admin.findMany({
       skip: (parseInt(page) - 1) * limit,
       take: limit,
-      where: {
-        roles: {
-          some: {
-            role: {
-              position: role,
+      where: role
+        ? {
+            roles: {
+              some: {
+                position: role,
+              },
             },
-          },
-        },
-      },
+          }
+        : {},
       select: {
         id: true,
         username: true,
@@ -139,14 +192,18 @@ class AdminService {
         phone: true,
         roles: {
           select: {
-            role: {
-              select: {
-                id: true,
-                position: true,
-              },
-            },
+            id: true,
+            position: true,
           },
         },
+        dateBirth: true,
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
+        nationality: true,
       },
     });
 
@@ -168,9 +225,7 @@ class AdminService {
         id: idAuth,
         roles: {
           some: {
-            role: {
-              position: "admin",
-            },
+            position: "admin",
           },
         },
       },
@@ -196,14 +251,18 @@ class AdminService {
         phone: true,
         roles: {
           select: {
-            role: {
-              select: {
-                id: true,
-                position: true,
-              },
-            },
+            id: true,
+            position: true,
           },
         },
+        dateBirth: true,
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
+        nationality: true,
       },
     });
 

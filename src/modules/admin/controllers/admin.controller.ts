@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   IBodyRequest,
+  IBodyRequestVerifyAdmin,
   IParamsRequestVerifyAdmin,
   IQueryRequest,
 } from "../../../interfaces/request.interface";
@@ -16,9 +17,10 @@ import getPrismaRequestError from "../../../helpers/getPrismaRequestError.helper
 import { GetAdminsByRoleDTO } from "../dto/get-admins.dto";
 import DishController from "./dish.admin.controller";
 import { GetAdminListQueryDTO } from "../dto/get-admin-query.dto";
-import { IPayloadAuthToken } from "../../../interfaces/token.interfaces";
+import { IPayloadAuthTokenAdmin } from "../../../interfaces/token.interfaces";
 import { GetAdminParamsDTO } from "../dto/get-admin-params.dto";
 import AdminAuthController from "./adminAuth.controller";
+import { IUpdateRolesAdminDTO } from "../dto/update-admin.dto";
 
 class AdminController {
   private adminService: AdminService;
@@ -74,6 +76,26 @@ class AdminController {
     }
   };
 
+  updateRolesAdmin = async (
+    req: IBodyRequestVerifyAdmin<
+      IUpdateRolesAdminDTO,
+      keyof IUpdateRolesAdminDTO,
+      IPayloadAuthTokenAdmin
+    >,
+    res: Response
+  ) => {
+    try {
+      const admin = await this.adminService.updateRolesAdmin({
+        ...req.body,
+        modifiedByAdminId: req.admin!.adminId,
+      });
+      res.send(successResponse(admin, "success"));
+    } catch (error) {
+      res.status(StatusCodes.BAD_REQUEST).send("Bad request");
+      console.log(error);
+    }
+  };
+
   getRoles = async (req: Request, res: Response) => {
     try {
       const data = await this.adminService.getRoles();
@@ -91,6 +113,7 @@ class AdminController {
   ) => {
     try {
       const data = await this.adminService.getAdminList(req.query);
+
       res.send(successResponse(data, "Success"));
     } catch (error) {
       console.log(error);
@@ -100,11 +123,11 @@ class AdminController {
   };
 
   getAdminById = async (
-    req: IParamsRequestVerifyAdmin<GetAdminParamsDTO, IPayloadAuthToken>,
+    req: IParamsRequestVerifyAdmin<GetAdminParamsDTO, IPayloadAuthTokenAdmin>,
     res: Response
   ) => {
     try {
-      if (!req.user?.userId) {
+      if (!req.admin?.adminId) {
         return res
           .status(StatusCodes.UNAUTHORIZED)
           .send(
@@ -114,7 +137,7 @@ class AdminController {
 
       const data = await this.adminService.getAdminById(
         req.params.id,
-        req.user.userId
+        req.admin.adminId
       );
       res.send(successResponse(data, "Success"));
     } catch (error) {

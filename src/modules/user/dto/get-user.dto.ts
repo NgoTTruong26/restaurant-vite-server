@@ -1,4 +1,3 @@
 import { User } from "@prisma/client";
 
-export interface GetUserDTO
-  extends Omit<User, "password" | "createdAt" | "updatedAt"> {}
+export type GetUserDTO = Omit<User, "password" | "createdAt" | "updatedAt">;

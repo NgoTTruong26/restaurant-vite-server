@@ -1,9 +1,12 @@
 import jwt from "jsonwebtoken";
 
-import { ResponseUserDTO } from "../modules/user/dto/response.dto";
 import prisma from "../configs/prisma.config";
-import { IPayloadAuthToken } from "../interfaces/token.interfaces";
+import {
+  IPayloadAuthToken,
+  IPayloadAuthTokenAdmin,
+} from "../interfaces/token.interfaces";
 import { ResponseAdminDTO } from "../modules/admin/dto/response.dto";
+import { GetUserDTO } from "../modules/user/dto/get-user.dto";
 
 interface AuthTokensResponse {
   accessToken: string;
@@ -14,6 +17,16 @@ const generateToken = (payload: IPayloadAuthToken): string => {
   return jwt.sign(
     { userId: payload.userId } as IPayloadAuthToken,
     process.env.JWT_SECRET!,
+    {
+      expiresIn: process.env.JWT_ACCESS_EXPIRATION!,
+    }
+  );
+};
+
+const generateTokenAdmin = (payload: IPayloadAuthTokenAdmin): string => {
+  return jwt.sign(
+    { adminId: payload.adminId } as IPayloadAuthTokenAdmin,
+    process.env.JWT_SECRET_ADMIN!,
     {
       expiresIn: process.env.JWT_ACCESS_EXPIRATION!,
     }
@@ -46,7 +59,7 @@ const generateAuthRefreshToken = async (
 };
 
 const generateAuthTokens = async (
-  user: ResponseUserDTO
+  user: GetUserDTO
 ): Promise<AuthTokensResponse> => {
   const accessToken = generateToken({ userId: user.id });
 
@@ -59,9 +72,9 @@ const generateAuthTokens = async (
 };
 
 const generateAdminAuthTokens = async (
-  user: ResponseAdminDTO
+  admin: ResponseAdminDTO
 ): Promise<AuthTokensResponse> => {
-  const accessToken = generateToken({ userId: user.id });
+  const accessToken = generateTokenAdmin({ adminId: admin.id });
 
   const refreshToken =
     await "a"; /* generateAuthRefreshToken({ userId: user.id }); */
@@ -74,6 +87,7 @@ const generateAdminAuthTokens = async (
 
 export {
   generateToken,
+  generateTokenAdmin,
   generateAuthTokens,
   generateAuthRefreshToken,
   generateAdminAuthTokens,

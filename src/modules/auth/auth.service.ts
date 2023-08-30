@@ -1,6 +1,5 @@
 import { signInDTO } from "./dto/sign-in.dto";
 import { SignUpDTO } from "./dto/sign-up.dto";
-import { ResponseUserDTO } from "../user/dto/response.dto";
 import { compare, encrypt } from "../../helpers/encryption.utils";
 import {
   IAuthDecodeToken,
@@ -10,6 +9,7 @@ import { generateAuthRefreshToken } from "../../services/token.service";
 import { PrismaClient } from "@prisma/client";
 import prismaClient from "../../configs/prisma.config";
 import { GetBookingDTO } from "../bookings/dto/booking.dto";
+import { GetUserDTO } from "../user/dto/get-user.dto";
 
 class AuthService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -17,7 +17,7 @@ class AuthService {
   signIn = async ({
     username,
     reqPassword,
-  }: signInDTO): Promise<ResponseUserDTO> => {
+  }: signInDTO): Promise<GetUserDTO> => {
     const data = await this.prisma.user.findUnique({
       where: {
         username,
@@ -37,7 +37,7 @@ class AuthService {
     return user;
   };
 
-  signUp = async (payload: SignUpDTO): Promise<ResponseUserDTO> => {
+  signUp = async (payload: SignUpDTO): Promise<GetUserDTO> => {
     const { reqPassword, repeatPassword, acceptTermsAndServices, ...data } =
       payload;
 
@@ -53,7 +53,7 @@ class AuthService {
 
   getProfileCheckAuth = async (
     userId?: string
-  ): Promise<Pick<ResponseUserDTO, "id" | "lastName" | "firstName"> | null> => {
+  ): Promise<Pick<GetUserDTO, "id" | "lastName" | "firstName"> | null> => {
     if (!userId) {
       return null;
     }
@@ -76,7 +76,7 @@ class AuthService {
     return data;
   };
 
-  getProfile = async (userId?: string): Promise<ResponseUserDTO | null> => {
+  getProfile = async (userId?: string): Promise<GetUserDTO | null> => {
     if (!userId) {
       return null;
     }

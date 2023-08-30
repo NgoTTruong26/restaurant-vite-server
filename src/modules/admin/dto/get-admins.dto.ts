@@ -1,3 +1,4 @@
+import { GetGenderDTO } from "../../user/dto/get-gender.dto";
 import { GetRoleDTO } from "./get-roles.dto";
 
 export class GetAdminsByRoleDTO {
@@ -9,11 +10,12 @@ export class GetAdminDTO {
   username: string;
   firstName: string;
   lastName: string;
+  dateBirth: Date | null;
+  gender: GetGenderDTO | null;
   email: string | null;
   phone: string | null;
-  roles: {
-    role: GetRoleDTO;
-  }[];
+  nationality: string | null;
+  roles: GetRoleDTO[];
 }
 
 export class GetAdminListDTO {

@@ -7,9 +7,15 @@ export interface IBodyRequest<T, K extends keyof T>
   body: Pick<T, K>;
 }
 
+export interface IBodyRequestVerifyAdmin<T, K extends keyof T, R>
+  extends Omit<Request, "body"> {
+  body: Pick<T, K>;
+  admin?: R;
+}
+
 export interface IParamsRequestVerifyAdmin<T, R> extends Omit<Request, "body"> {
   params: T & ParamsDictionary;
-  user?: R;
+  admin?: R;
 }
 
 export interface IBodyRequestVerifyCheckUser<B, T>
@@ -37,5 +43,5 @@ export interface IAuthRequest<T> extends Request {
 
 export interface IAdminAuthRequest<T> extends Request {
   headers: IHeadersAdminAuthRequest;
-  user?: T;
+  admin?: T;
 }

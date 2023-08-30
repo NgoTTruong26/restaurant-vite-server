@@ -27,7 +27,7 @@ model User {
   email                  String?        @unique @db.VarChar(255)
   password               String         @db.VarChar(255)
   phone                  String?        @unique @db.VarChar(255)
-  nationality            String?
+  nationality            String?        @db.VarChar(255)
   bookings               Booking[]
   refreshTokens          RefreshToken[]
   acceptTermsAndServices Boolean        @default(true)
@@ -45,53 +45,46 @@ model RefreshTokenForAdmin {
 }
 
 model Gender {
-  id     String @id @default(cuid())
-  gender String @unique @db.VarChar(255)
+  id     String  @id @default(cuid())
+  gender String  @unique @db.VarChar(255)
   users  User[]
+  admins Admin[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Role {
-  id        String        @id @default(cuid())
-  position  String        @db.VarChar(255)
-  admins    AdminsRoles[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id        String   @id @default(cuid())
+  position  String   @db.VarChar(255)
+  admins    Admin[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Admin {
-  id              String                 @id @default(cuid())
-  username        String                 @unique @db.VarChar(255)
-  firstName       String                 @db.VarChar(255)
-  lastName        String                 @db.VarChar(255)
+  id        String    @id @default(cuid())
+  username  String    @unique @db.VarChar(255)
+  firstName String    @db.VarChar(255)
+  lastName  String    @db.VarChar(255)
+  dateBirth DateTime?
+  gender    Gender?   @relation(fields: [genderId], references: [id])
+  genderId  String?
+
   email           String?                @unique @db.VarChar(255)
   password        String                 @db.VarChar(255)
   phone           String?                @unique @db.VarChar(255)
+  nationality     String?                @db.VarChar(255)
+  roles           Role[]
+  modifiedByAdmin Admin[]                @relation("ModifyAdmin")
+  adminModifiedId Admin[]                @relation("ModifyAdmin")
   refreshTokens   RefreshTokenForAdmin[]
-  roles           AdminsRoles[]          @relation("admin")
-  modifiedByAdmin AdminsRoles[]          @relation("modifiedByAdmin")
 
   RecordsEditHistoryForBuffetMenu RecordEditHistoryForBuffetMenu[]
   RecordsEditHistoryForSetDish    RecordEditHistoryForSetDish[]
   RecordsEditHistoryForDish       RecordEditHistoryForDish[]
   createdAt                       DateTime                         @default(now())
   updatedAt                       DateTime                         @updatedAt
-}
-
-model AdminsRoles {
-  role              Role     @relation(fields: [roleId], references: [id])
-  roleId            String
-  admin             Admin    @relation("admin", fields: [adminId], references: [id])
-  adminId           String
-  modifiedByAdmin   Admin    @relation("modifiedByAdmin", fields: [modifiedByAdminId], references: [id])
-  modifiedByAdminId String
-  notes             String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@id([roleId, adminId, modifiedByAdminId])
 }
 
 model BuffetMenu {

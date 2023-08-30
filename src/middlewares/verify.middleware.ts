@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { errorResponse, successResponse } from "../helpers/response.helper";
-import { IAuthDecodeToken } from "../interfaces/token.interfaces";
+import {
+  IAuthDecodeToken,
+  IAuthDecodeTokenAdmin,
+} from "../interfaces/token.interfaces";
 import jwt from "jsonwebtoken";
 import {
   IAdminAuthRequest,
@@ -54,7 +57,7 @@ class Verify {
   }
 
   adminVerifyAccessToken(
-    req: IAdminAuthRequest<IAuthDecodeToken>,
+    req: IAdminAuthRequest<IAuthDecodeTokenAdmin>,
     res: Response,
     next: NextFunction
   ) {
@@ -66,7 +69,7 @@ class Verify {
           errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
         );
 
-    jwt.verify(token, process.env.JWT_SECRET!, (err, decode) => {
+    jwt.verify(token, process.env.JWT_SECRET_ADMIN!, (err, decode) => {
       if (err) {
         console.log(err);
 
@@ -75,13 +78,13 @@ class Verify {
           .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
       }
 
-      if (!(decode as IAuthDecodeToken).userId) {
+      if (!(decode as IAuthDecodeTokenAdmin).adminId) {
         return res
           .status(StatusCodes.UNAUTHORIZED)
           .send(errorResponse(StatusCodes.UNAUTHORIZED, "Token is not valid"));
       }
 
-      req.user = decode as IAuthDecodeToken;
+      req.admin = decode as IAuthDecodeTokenAdmin;
 
       next();
     });
