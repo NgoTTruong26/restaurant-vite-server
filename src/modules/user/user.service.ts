@@ -1,17 +1,17 @@
-import { PrismaClient, User } from "@prisma/client";
-import { encrypt } from "../../helpers/encryption.utils";
-import { CreateUserDTO } from "./dto/create-user.dto";
+import { PrismaClient, User } from '@prisma/client';
+import { encrypt } from '../../helpers/encryption.utils';
+import { CreateUserDTO } from './dto/create-user.dto';
 import {
   ChangePasswordDTO,
   DataUpdate,
   UpdateProfileDTO,
-} from "./dto/update-user.dto";
-import { DeleteUserDTO } from "./dto/delete-user.dto";
-import prismaClient from "../../configs/prisma.config";
-import exclude from "../../configs/exclude.config";
-import { compare } from "bcryptjs";
-import { GetUserDTO } from "./dto/get-user.dto";
-import { GetGenderDTO } from "./dto/get-gender.dto";
+} from './dto/update-user.dto';
+import { DeleteUserDTO } from './dto/delete-user.dto';
+import prismaClient from '../../configs/prisma.config';
+import exclude from '../../configs/exclude.config';
+import { compare } from 'bcryptjs';
+import { GetUserDTO } from './dto/get-user.dto';
+import { GetGenderDTO } from './dto/get-gender.dto';
 
 class UserService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -62,15 +62,14 @@ class UserService {
       },
     });
 
-    return exclude<User, "password">(user, ["password"]);
+    return exclude<User, 'password'>(user, ['password']);
   };
 
   updateProfileUser = async (
-    payload: UpdateProfileDTO
+    payload: UpdateProfileDTO,
   ): Promise<GetUserDTO> => {
     const dataUpdate: DataUpdate = {
-      lastName: payload.lastname,
-      firstName: payload.firstname,
+      fullName: payload.fullName,
       nationality: payload.nationality,
     };
 
@@ -81,7 +80,7 @@ class UserService {
     if (payload.gender) {
       dataUpdate.gender = {
         connect: {
-          gender: payload.gender,
+          id: payload.gender,
         },
       };
     }
@@ -105,14 +104,13 @@ class UserService {
   };
 
   updateSecurityUser = async (
-    payload: UpdateProfileDTO
+    payload: UpdateProfileDTO,
   ): Promise<GetUserDTO> => {
     const { id, ...dataUpdate } = payload;
 
     const { password, ...user } = await this.prisma.user.update({
       data: {
-        lastName: dataUpdate.lastname,
-        firstName: dataUpdate.firstname,
+        fullName: dataUpdate.fullName,
         dateBirth: new Date(`${payload.dateBirth}`) || undefined,
       },
       where: { id },
@@ -155,7 +153,7 @@ class UserService {
 
   deleteUser = async ({
     id,
-  }: DeleteUserDTO): Promise<Pick<GetUserDTO, "id">> => {
+  }: DeleteUserDTO): Promise<Pick<GetUserDTO, 'id'>> => {
     return await this.prisma.user.delete({
       where: {
         id,

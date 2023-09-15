@@ -15,7 +15,7 @@ export function successResponse<T>(
 
 export function errorResponse(
   status = StatusCodes.BAD_GATEWAY,
-  message = "Success"
+  message = "Bad request"
 ): IBodyResponse<null> {
   return {
     status,

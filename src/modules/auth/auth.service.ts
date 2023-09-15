@@ -1,15 +1,15 @@
-import { signInDTO } from "./dto/sign-in.dto";
-import { SignUpDTO } from "./dto/sign-up.dto";
-import { compare, encrypt } from "../../helpers/encryption.utils";
+import { signInDTO } from './dto/sign-in.dto';
+import { SignUpDTO } from './dto/sign-up.dto';
+import { compare, encrypt } from '../../helpers/encryption.utils';
 import {
   IAuthDecodeToken,
   IPayloadAuthToken,
-} from "../../interfaces/token.interfaces";
-import { generateAuthRefreshToken } from "../../services/token.service";
-import { PrismaClient } from "@prisma/client";
-import prismaClient from "../../configs/prisma.config";
-import { GetBookingDTO } from "../bookings/dto/booking.dto";
-import { GetUserDTO } from "../user/dto/get-user.dto";
+} from '../../interfaces/token.interfaces';
+import { generateAuthRefreshToken } from '../../services/token.service';
+import { PrismaClient } from '@prisma/client';
+import prismaClient from '../../configs/prisma.config';
+import { GetBookingDTO } from '../bookings/dto/booking.dto';
+import { GetUserDTO } from '../user/dto/get-user.dto';
 
 class AuthService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -52,8 +52,8 @@ class AuthService {
   };
 
   getProfileCheckAuth = async (
-    userId?: string
-  ): Promise<Pick<GetUserDTO, "id" | "lastName" | "firstName"> | null> => {
+    userId?: string,
+  ): Promise<Pick<GetUserDTO, 'id' | 'fullName'> | null> => {
     if (!userId) {
       return null;
     }
@@ -64,8 +64,7 @@ class AuthService {
       },
       select: {
         id: true,
-        lastName: true,
-        firstName: true,
+        fullName: true,
       },
     });
 
@@ -104,7 +103,7 @@ class AuthService {
 
   refreshToken = async (
     payload: IPayloadAuthToken,
-    refreshToken: string
+    refreshToken: string,
   ): Promise<void> => {
     const data = await this.prisma.refreshToken.findMany({
       where: {
@@ -190,13 +189,12 @@ class AuthService {
         user: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
+            fullName: true,
           },
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
   };

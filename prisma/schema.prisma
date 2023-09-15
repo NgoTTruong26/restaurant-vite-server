@@ -19,8 +19,7 @@ model RefreshToken {
 model User {
   id                     String         @id @default(cuid())
   username               String         @unique @db.VarChar(255)
-  firstName              String         @db.VarChar(255)
-  lastName               String         @db.VarChar(255)
+  fullName               String         @default("Leanne Madona") @db.VarChar(255)
   dateBirth              DateTime?
   gender                 Gender?        @relation(fields: [genderId], references: [id])
   genderId               String?
@@ -65,8 +64,7 @@ model Role {
 model Admin {
   id        String    @id @default(cuid())
   username  String    @unique @db.VarChar(255)
-  firstName String    @db.VarChar(255)
-  lastName  String    @db.VarChar(255)
+  fullName  String    @db.VarChar(255)
   dateBirth DateTime?
   gender    Gender?   @relation(fields: [genderId], references: [id])
   genderId  String?

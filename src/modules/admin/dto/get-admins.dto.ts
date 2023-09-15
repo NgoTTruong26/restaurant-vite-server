@@ -1,5 +1,5 @@
-import { GetGenderDTO } from "../../user/dto/get-gender.dto";
-import { GetRoleDTO } from "./get-roles.dto";
+import { GetGenderDTO } from '../../user/dto/get-gender.dto';
+import { GetRoleDTO } from './get-roles.dto';
 
 export class GetAdminsByRoleDTO {
   position: string;
@@ -8,8 +8,7 @@ export class GetAdminsByRoleDTO {
 export class GetAdminDTO {
   id: string;
   username: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   dateBirth: Date | null;
   gender: GetGenderDTO | null;
   email: string | null;

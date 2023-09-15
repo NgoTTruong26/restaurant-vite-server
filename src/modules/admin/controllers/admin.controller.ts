@@ -14,13 +14,17 @@ import {
 } from "../../../helpers/response.helper";
 import { Prisma } from "@prisma/client";
 import getPrismaRequestError from "../../../helpers/getPrismaRequestError.helper";
-import { GetAdminsByRoleDTO } from "../dto/get-admins.dto";
+import { GetAdminDTO, GetAdminsByRoleDTO } from "../dto/get-admins.dto";
 import DishController from "./dish.admin.controller";
 import { GetAdminListQueryDTO } from "../dto/get-admin-query.dto";
 import { IPayloadAuthTokenAdmin } from "../../../interfaces/token.interfaces";
 import { GetAdminParamsDTO } from "../dto/get-admin-params.dto";
 import AdminAuthController from "./adminAuth.controller";
-import { IUpdateRolesAdminDTO } from "../dto/update-admin.dto";
+import {
+  ChangePasswordAdminDTO,
+  IUpdateRolesAdminDTO,
+  UpdateProfileAdminDTO,
+} from "../dto/update-admin.dto";
 
 class AdminController {
   private adminService: AdminService;
@@ -73,6 +77,50 @@ class AdminController {
       res.send(successResponse(news, "success"));
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  updateProfileAdmin = async (
+    req: IBodyRequest<UpdateProfileAdminDTO, keyof UpdateProfileAdminDTO>,
+    res: Response
+  ) => {
+    try {
+      const admin = await this.adminService.updateProfileAdmin(req.body);
+
+      res.send(successResponse(admin, "Updated successfully"));
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        console.log(error);
+
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(
+            errorResponse(
+              StatusCodes.BAD_REQUEST,
+              getPrismaRequestError(error.code, error.meta?.target as any)
+            )
+          );
+      }
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(errorResponse(StatusCodes.BAD_REQUEST, "Admin not found"));
+    }
+  };
+
+  changePassword = async (
+    req: IBodyRequest<ChangePasswordAdminDTO, keyof ChangePasswordAdminDTO>,
+    res: Response
+  ) => {
+    try {
+      const admin = await this.adminService.changePassword(req.body);
+
+      res.send(successResponse(admin, ""));
+    } catch (error) {
+      console.log(error);
+
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(errorResponse(StatusCodes.BAD_REQUEST, "Bad Request"));
     }
   };
 

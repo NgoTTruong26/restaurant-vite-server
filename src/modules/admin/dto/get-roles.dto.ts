@@ -6,5 +6,5 @@ export class GetRoleDTO {
 export class GetRoleListDTO {
   roles: GetRoleDTO[];
   total: number;
-  totalAdmin: number;
+  totalAdmins: number;
 }

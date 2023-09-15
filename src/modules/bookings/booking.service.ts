@@ -1,9 +1,9 @@
-import { Booking } from "@prisma/client";
-import prismaClient from "../../configs/prisma.config";
-import { CreateBookingDTO, GetBookingDTO } from "./dto/booking.dto";
-import { GetChildrenCategoryDTO } from "./dto/get-children-category.dto";
-import { GetOneBookingDTO } from "./dto/get-booking-query.dto";
-import { GetBookingStatusDTO } from "./dto/get-booking-status.dto";
+import { Booking } from '@prisma/client';
+import prismaClient from '../../configs/prisma.config';
+import { CreateBookingDTO, GetBookingDTO } from './dto/booking.dto';
+import { GetChildrenCategoryDTO } from './dto/get-children-category.dto';
+import { GetOneBookingDTO } from './dto/get-booking-query.dto';
+import { GetBookingStatusDTO } from './dto/get-booking-status.dto';
 
 class BookingService {
   constructor(private prisma = prismaClient) {}
@@ -21,7 +21,7 @@ class BookingService {
   };
 
   getOneBooking = async (
-    query: GetOneBookingDTO
+    query: GetOneBookingDTO,
   ): Promise<GetBookingDTO | null> => {
     if (!query.get_booking) {
       return null;
@@ -31,7 +31,7 @@ class BookingService {
 
     const booking = (
       await this.prisma.booking.findMany({
-        where: phoneNumberPattern.test(query.get_booking || "")
+        where: phoneNumberPattern.test(query.get_booking || '')
           ? { phoneNumber: query.get_booking }
           : {
               id: query.get_booking,
@@ -89,13 +89,12 @@ class BookingService {
           user: {
             select: {
               id: true,
-              firstName: true,
-              lastName: true,
+              fullName: true,
             },
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
       })
     )[0];
@@ -133,7 +132,7 @@ class BookingService {
             create: bookingsForChildren.reduce(
               (
                 prevs: { quantity: number; childrenCategoryId: string }[],
-                curr
+                curr,
               ) => {
                 if (curr.quantity > 0) {
                   return [
@@ -146,7 +145,7 @@ class BookingService {
                 }
                 return prevs;
               },
-              []
+              [],
             ),
           },
           bookingStatus: {
@@ -218,8 +217,8 @@ class BookingService {
           user: {
             select: {
               id: true,
-              firstName: true,
-              lastName: true,
+
+              fullName: true,
             },
           },
         },
@@ -239,7 +238,7 @@ class BookingService {
           create: bookingsForChildren.reduce(
             (
               prevs: { quantity: number; childrenCategoryId: string }[],
-              curr
+              curr,
             ) => {
               if (curr.quantity > 0) {
                 return [
@@ -252,7 +251,7 @@ class BookingService {
               }
               return prevs;
             },
-            []
+            [],
           ),
         },
         bookingStatus: {
@@ -329,8 +328,8 @@ class BookingService {
         user: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
+
+            fullName: true,
           },
         },
       },
@@ -347,7 +346,7 @@ class BookingService {
         step: true,
       },
       orderBy: {
-        step: "asc",
+        step: 'asc',
       },
     });
     return bookingStatus;

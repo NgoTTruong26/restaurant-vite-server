@@ -55,6 +55,17 @@ class AdminRoute extends BaseRoute {
       .post("/create-genders", this.adminController.createGenders)
       .post("/sign-in", this.adminController.AdminAuthController.signIn)
       .put(
+        "/update-profile",
+        /* validate(this.userValidation.updateUser.body), */
+        this.adminController.updateProfileAdmin
+      )
+      .put(
+        "/change-password",
+        this.verify.adminVerifyAccessToken,
+        /* validate(this.userValidation.updateUser.body), */
+        this.adminController.changePassword
+      )
+      .put(
         "/update-roles-admin",
         this.verify.adminVerifyAccessToken,
         this.adminController.updateRolesAdmin

@@ -1,6 +1,6 @@
-import { GetBuffetMenuDTO } from "../../dish/dto/get-dishes.dto";
-import { GetBookingStatusDTO } from "./get-booking-status.dto";
-import { GetChildrenCategoryDTO } from "./get-children-category.dto";
+import { GetBuffetMenuDTO } from '../../dish/dto/get-dishes.dto';
+import { GetBookingStatusDTO } from './get-booking-status.dto';
+import { GetChildrenCategoryDTO } from './get-children-category.dto';
 
 export class GetVATDTO {
   id: string;
@@ -53,7 +53,6 @@ export class GetBookingDTO {
   cancellation: boolean;
   user: {
     id: string;
-    firstName: string;
-    lastName: string;
+    fullName: string;
   } | null;
 }

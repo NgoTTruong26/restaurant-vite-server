@@ -1,15 +1,17 @@
-import { PrismaClient } from "@prisma/client";
-import { CreateAdminDTO } from "../dto/admin.dto";
-import { encrypt } from "../../../helpers/encryption.utils";
-import { ResponseAdminDTO } from "../dto/response.dto";
-import { GetAdminDTO, GetAdminListDTO } from "../dto/get-admins.dto";
-import prismaClient from "../../../configs/prisma.config";
-import { GetRoleDTO, GetRoleListDTO } from "../dto/get-roles.dto";
-import { GetAdminListQueryDTO } from "../dto/get-admin-query.dto";
+import { PrismaClient } from '@prisma/client';
+import { CreateAdminDTO } from '../dto/admin.dto';
+import { encrypt } from '../../../helpers/encryption.utils';
+import { ResponseAdminDTO } from '../dto/response.dto';
+import { GetAdminDTO, GetAdminListDTO } from '../dto/get-admins.dto';
+import prismaClient from '../../../configs/prisma.config';
+import { GetRoleDTO, GetRoleListDTO } from '../dto/get-roles.dto';
+import { GetAdminListQueryDTO } from '../dto/get-admin-query.dto';
 import {
+  ChangePasswordAdminDTO,
+  DataUpdateAdmin,
   IDataUpdateRolesAdmin,
-  IUpdateRolesAdminDTO,
-} from "../dto/update-admin.dto";
+  UpdateProfileAdminDTO,
+} from '../dto/update-admin.dto';
 
 class AdminService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -24,14 +26,14 @@ class AdminService {
         roles: {
           connect: [
             {
-              id: "",
-              position: "",
+              id: '',
+              position: '',
             },
           ],
         },
         modifiedByAdmin: {
           connect: {
-            id: "",
+            id: '',
           },
         },
       },
@@ -44,13 +46,13 @@ class AdminService {
     await this.prisma.gender.createMany({
       data: [
         {
-          gender: "male",
+          gender: 'male',
         },
         {
-          gender: "female",
+          gender: 'female',
         },
         {
-          gender: "other",
+          gender: 'other',
         },
       ],
     });
@@ -61,10 +63,10 @@ class AdminService {
       data: [
         {
           srcImg:
-            "https://chefdzung.com.vn/uploads/images/album/untitled-1-1200x676-9.jpg",
-          title: "aaaaaaaaaaaa ",
-          content: "bbbbbbbbbbbbbbbbbbbbb",
-          introduce: "helooooooooooooo",
+            'https://chefdzung.com.vn/uploads/images/album/untitled-1-1200x676-9.jpg',
+          title: 'aaaaaaaaaaaa ',
+          content: 'bbbbbbbbbbbbbbbbbbbbb',
+          introduce: 'helooooooooooooo',
         },
       ],
     });
@@ -72,8 +74,52 @@ class AdminService {
     return newsPreview;
   };
 
+  updateProfileAdmin = async (
+    payload: UpdateProfileAdminDTO,
+  ): Promise<GetAdminDTO> => {
+    const dataUpdate: DataUpdateAdmin = {
+      fullName: payload.fullName,
+      nationality: payload.nationality,
+    };
+
+    if (!isNaN(new Date(`${payload.dateBirth}`).getFullYear())) {
+      dataUpdate.dateBirth = new Date(`${payload.dateBirth}`);
+    }
+
+    if (payload.gender) {
+      dataUpdate.gender = {
+        connect: {
+          id: payload.gender,
+        },
+      };
+    }
+
+    const { password, ...admin } = await this.prisma.admin.update({
+      data: {
+        ...dataUpdate,
+      },
+      where: { id: payload.id },
+      include: {
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
+        roles: {
+          select: {
+            id: true,
+            position: true,
+          },
+        },
+      },
+    });
+
+    return admin;
+  };
+
   updateRolesAdmin = async (
-    payload: IDataUpdateRolesAdmin
+    payload: IDataUpdateRolesAdmin,
   ): Promise<GetAdminDTO> => {
     console.log(payload.adminId);
 
@@ -82,10 +128,7 @@ class AdminService {
       data: {
         roles: {
           connect: payload.roles.reduce<{ id: string }[]>((prevs, curr) => {
-            if (typeof curr === "string") {
-              return [...prevs, { id: curr }];
-            }
-            return prevs;
+            return [...prevs, { id: curr.roleId }];
           }, []),
           disconnect: payload.removeRoles
             ? payload.removeRoles.map((role) => ({
@@ -100,8 +143,8 @@ class AdminService {
       select: {
         id: true,
         username: true,
-        firstName: true,
-        lastName: true,
+
+        fullName: true,
         email: true,
         phone: true,
         roles: {
@@ -124,6 +167,43 @@ class AdminService {
     return admin;
   };
 
+  changePassword = async (
+    payload: ChangePasswordAdminDTO,
+  ): Promise<GetAdminDTO> => {
+    const data = await this.prisma.admin.update({
+      where: {
+        id: payload.id,
+      },
+      data: {
+        password: await encrypt(payload.newPassword),
+      },
+      select: {
+        id: true,
+        username: true,
+
+        fullName: true,
+        email: true,
+        phone: true,
+        roles: {
+          select: {
+            id: true,
+            position: true,
+          },
+        },
+        dateBirth: true,
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
+        nationality: true,
+      },
+    });
+
+    return data;
+  };
+
   getRoles = async (): Promise<GetRoleListDTO> => {
     const roles = await this.prisma.role.findMany({
       select: {
@@ -134,32 +214,36 @@ class AdminService {
 
     const total = await this.prisma.role.count();
 
-    const totalAdmin = await this.prisma.admin.count();
+    const totalAdmins = await this.prisma.admin.count();
 
     return {
       roles,
       total,
-      totalAdmin,
+      totalAdmins,
     };
   };
 
   getAdminList = async ({
-    page = "1",
+    page = '1',
     role,
+    search,
   }: GetAdminListQueryDTO): Promise<GetAdminListDTO | null> => {
-    const limit = 5;
+    const limit = 6;
 
-    const total = role
-      ? await this.prisma.admin.count({
-          where: {
-            roles: {
+    const total = await this.prisma.admin.count({
+      where: {
+        fullName: {
+          contains: search,
+        },
+        roles: role
+          ? {
               some: {
                 position: role,
               },
-            },
-          },
-        })
-      : await this.prisma.admin.count();
+            }
+          : {},
+      },
+    });
 
     const totalPages = Math.ceil(total / limit);
 
@@ -174,20 +258,23 @@ class AdminService {
     const adminList = await this.prisma.admin.findMany({
       skip: (parseInt(page) - 1) * limit,
       take: limit,
-      where: role
-        ? {
-            roles: {
+      where: {
+        fullName: {
+          contains: search,
+        },
+        roles: role
+          ? {
               some: {
                 position: role,
               },
-            },
-          }
-        : {},
+            }
+          : {},
+      },
       select: {
         id: true,
         username: true,
-        firstName: true,
-        lastName: true,
+
+        fullName: true,
         email: true,
         phone: true,
         roles: {
@@ -218,14 +305,14 @@ class AdminService {
 
   getAdminById = async (
     idAdmin: string,
-    idAuth: string
+    idAuth: string,
   ): Promise<GetAdminDTO | null> => {
     const adminAuth = await this.prisma.admin.findUnique({
       where: {
         id: idAuth,
         roles: {
           some: {
-            position: "admin",
+            position: 'admin',
           },
         },
       },
@@ -245,8 +332,8 @@ class AdminService {
       select: {
         id: true,
         username: true,
-        firstName: true,
-        lastName: true,
+
+        fullName: true,
         email: true,
         phone: true,
         roles: {
@@ -267,6 +354,12 @@ class AdminService {
     });
 
     return admin;
+  };
+
+  deleteAdmins = async (): Promise<void> => {
+    await this.prisma.admin.deleteMany({
+      where: { id: { in: [] } },
+    });
   };
 }
 

@@ -69,9 +69,12 @@ class UserController {
   ) => {
     try {
       const user = await this.userService.updateProfileUser(req.body);
+
       res.send(successResponse(user, "Updated successfully"));
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        console.log(error);
+
         return res
           .status(StatusCodes.BAD_REQUEST)
           .send(
