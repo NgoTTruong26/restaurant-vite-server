@@ -1,17 +1,17 @@
 import { PrismaClient, User } from '@prisma/client';
+import { compare } from 'bcryptjs';
+import exclude from '../../configs/exclude.config';
+import prismaClient from '../../configs/prisma.config';
 import { encrypt } from '../../helpers/encryption.utils';
 import { CreateUserDTO } from './dto/create-user.dto';
+import { DeleteUserDTO } from './dto/delete-user.dto';
+import { GetGenderDTO } from './dto/get-gender.dto';
+import { GetUserDTO } from './dto/get-user.dto';
 import {
   ChangePasswordDTO,
   DataUpdate,
   UpdateProfileDTO,
 } from './dto/update-user.dto';
-import { DeleteUserDTO } from './dto/delete-user.dto';
-import prismaClient from '../../configs/prisma.config';
-import exclude from '../../configs/exclude.config';
-import { compare } from 'bcryptjs';
-import { GetUserDTO } from './dto/get-user.dto';
-import { GetGenderDTO } from './dto/get-gender.dto';
 
 class UserService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -103,22 +103,6 @@ class UserService {
     return user;
   };
 
-  updateSecurityUser = async (
-    payload: UpdateProfileDTO,
-  ): Promise<GetUserDTO> => {
-    const { id, ...dataUpdate } = payload;
-
-    const { password, ...user } = await this.prisma.user.update({
-      data: {
-        fullName: dataUpdate.fullName,
-        dateBirth: new Date(`${payload.dateBirth}`) || undefined,
-      },
-      where: { id },
-    });
-
-    return user;
-  };
-
   changePassword = async (payload: ChangePasswordDTO): Promise<GetUserDTO> => {
     const currentPassword = (
       await this.prisma.user.findUnique({
@@ -139,7 +123,7 @@ class UserService {
       throw new Error();
     }
 
-    const data = await this.prisma.user.update({
+    const { password, ...data } = await this.prisma.user.update({
       where: {
         id: payload.id,
       },

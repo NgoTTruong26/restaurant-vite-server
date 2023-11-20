@@ -34,7 +34,13 @@ export class DataUpdateAdmin {
   nationality?: string;
 }
 
+export class ChangePasswordAdminByIdDTO {
+  id: string;
+  newPassword: string;
+}
+
 export class ChangePasswordAdminDTO {
   id: string;
+  oldPassword: string;
   newPassword: string;
 }

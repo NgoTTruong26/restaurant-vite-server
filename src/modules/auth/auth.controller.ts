@@ -1,23 +1,23 @@
-import { Response } from "express";
+import { Prisma } from '@prisma/client';
+import { Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import getPrismaRequestError from '../../helpers/getPrismaRequestError.helper';
+import { errorResponse, successResponse } from '../../helpers/response.helper';
 import {
   IAuthRequest,
   IBodyRequest,
   IRefreshTokenRequest,
-} from "../../interfaces/request.interface";
-import AuthService from "./auth.service";
-import { signInDTO } from "./dto/sign-in.dto";
-import { StatusCodes } from "http-status-codes";
-import { errorResponse, successResponse } from "../../helpers/response.helper";
-import * as tokenService from "../../services/token.service";
-import { SignUpDTO } from "./dto/sign-up.dto";
-import { RefreshTokenDTO } from "./dto/refresh-token.dto";
+} from '../../interfaces/request.interface';
 import {
   IAuthDecodeToken,
   IPayloadAuthToken,
-} from "../../interfaces/token.interfaces";
-import { Prisma } from "@prisma/client";
-import getPrismaRequestError from "../../helpers/getPrismaRequestError.helper";
-import { EJWTError } from "../../middlewares/verify.middleware";
+} from '../../interfaces/token.interfaces';
+import { EJWTError } from '../../middlewares/verify.middleware';
+import * as tokenService from '../../services/token.service';
+import AuthService from './auth.service';
+import { RefreshTokenDTO } from './dto/refresh-token.dto';
+import { signInDTO } from './dto/sign-in.dto';
+import { SignUpDTO } from './dto/sign-up.dto';
 
 class AuthController {
   private authService: AuthService;
@@ -28,7 +28,7 @@ class AuthController {
 
   signIn = async (
     req: IBodyRequest<signInDTO, keyof signInDTO>,
-    res: Response
+    res: Response,
   ) => {
     try {
       const user = await this.authService.signIn(req.body);
@@ -39,27 +39,27 @@ class AuthController {
       res.cookie(process.env.REFRESH_TOKEN!, refreshToken, {
         httpOnly: false,
         secure: false, // lúc deploy thì để true
-        sameSite: "strict",
+        sameSite: 'strict',
       });
 
       res.send(
-        successResponse({ ...user, accessToken }, "Sign In successfully")
+        successResponse({ ...user, accessToken }, 'Sign In successfully'),
       );
     } catch (error) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .send(errorResponse(StatusCodes.BAD_REQUEST, "User not found"));
+        .send(errorResponse(StatusCodes.BAD_REQUEST, 'User not found'));
     }
   };
 
   signUp = async (
     req: IBodyRequest<SignUpDTO, keyof SignUpDTO>,
-    res: Response
+    res: Response,
   ) => {
     try {
       const user = await this.authService.signUp(req.body);
 
-      res.send(successResponse(user, "Sign Up successfully"));
+      res.send(successResponse(user, 'Sign Up successfully'));
     } catch (error) {
       console.log(error);
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -68,37 +68,54 @@ class AuthController {
           .send(
             errorResponse(
               StatusCodes.BAD_REQUEST,
-              getPrismaRequestError(error.code, error.meta?.target as any)
-            )
+              getPrismaRequestError(error.code, error.meta?.target as any),
+            ),
           );
       }
 
       res
         .status(StatusCodes.BAD_REQUEST)
-        .send(errorResponse(StatusCodes.BAD_REQUEST, "BAD_REQUEST"));
+        .send(errorResponse(StatusCodes.BAD_REQUEST, 'BAD_REQUEST'));
     }
+  };
+
+  getProfileCheckAuth = async (
+    req: IAuthRequest<IPayloadAuthToken>,
+    res: Response,
+  ) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.send(successResponse<null>(null, ''));
+    }
+
+    const user = await this.authService.getProfileCheckAuth(userId);
+
+    if (!user) return res.send(successResponse<null>(null, ''));
+
+    res.send(successResponse(user, ''));
   };
 
   profile = async (req: IAuthRequest<IPayloadAuthToken>, res: Response) => {
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.send(successResponse<null>(null, ""));
+      return res.send(successResponse<null>(null, ''));
     }
 
     const user = await this.authService.getProfile(userId);
 
-    if (!user) return res.send(successResponse<null>(null, ""));
+    if (!user) return res.send(successResponse<null>(null, ''));
 
-    res.send(successResponse(user, ""));
+    res.send(successResponse(user, ''));
   };
 
   refreshToken = async (
     req: IRefreshTokenRequest<RefreshTokenDTO, IAuthDecodeToken>,
-    res: Response
+    res: Response,
   ) => {
     try {
-      const refreshToken = req.cookies["refresh_token"];
+      const refreshToken = req.cookies['refresh_token'];
 
       if (req.err_jwt_exp === EJWTError.EXPIRED_ERROR) {
         await this.authService.deleteRefreshToken(refreshToken);
@@ -106,25 +123,23 @@ class AuthController {
         res.clearCookie(process.env.REFRESH_TOKEN!);
 
         return res
-          .status(StatusCodes.UNAUTHORIZED)
+          .status(StatusCodes.FORBIDDEN)
           .send(
-            errorResponse(StatusCodes.UNAUTHORIZED, "Phiên đăng nhập hết hạn")
+            errorResponse(StatusCodes.FORBIDDEN, 'Phiên đăng nhập hết hạn'),
           );
       }
 
       if (!req.user) {
         return res
-          .status(StatusCodes.UNAUTHORIZED)
-          .send(
-            errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
-          );
+          .status(StatusCodes.FORBIDDEN)
+          .send(errorResponse(StatusCodes.FORBIDDEN, 'You are not authorized'));
       }
 
       await this.authService.refreshToken(req.user, refreshToken);
 
       const accessToken = tokenService.generateToken(req.user);
 
-      res.send(successResponse({ accessToken }, "Successfully"));
+      res.send(successResponse({ accessToken }, 'Successfully'));
     } catch (error) {
       console.log(error);
 
@@ -132,7 +147,7 @@ class AuthController {
 
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .send(errorResponse(StatusCodes.BAD_REQUEST, "Refresh token invalid"));
+        .send(errorResponse(StatusCodes.BAD_REQUEST, 'Refresh token invalid'));
     }
   };
 
@@ -141,13 +156,13 @@ class AuthController {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .send(
-          errorResponse(StatusCodes.UNAUTHORIZED, "You are not authorized")
+          errorResponse(StatusCodes.UNAUTHORIZED, 'You are not authorized'),
         );
     }
 
     const bookings = await this.authService.getBookings(req.user?.userId);
 
-    return res.send(successResponse(bookings, "Successfully"));
+    return res.send(successResponse(bookings, 'Successfully'));
   };
 }
 

@@ -1,17 +1,19 @@
-import { BuffetMenu, Dish, PrismaClient, SetDish } from "@prisma/client";
+import { BuffetMenu, Dish, PrismaClient, SetDish } from '@prisma/client';
 import {
   CreateBuffetMenuDTO,
   CreateDish,
   CreateSetDishDTO,
-} from "../dto/dish.dto";
-import { ResponseDishDTO } from "../dto/response.dto";
-import prismaClient from "../../../configs/prisma.config";
+} from '../dto/dish.dto';
+import prismaClient from '../../../configs/prisma.config';
 import {
   ConnectDishes,
   DishConnectedDTO,
   SetDishConnectedDTO,
-} from "../dto/connect-dish.dto";
-import { DisconnectDishes } from "../dto/disconnec-dish.dto";
+} from '../dto/connect-dish.dto';
+import { DisconnectDishes } from '../dto/disconnec-dish.dto';
+import { GetDishDTO } from '../../dish/dto/get-dishes.dto';
+import { GetBuffetMenuDTO } from '../../dish/dto/get-dishes.dto';
+import { GetSetDishDTO } from '../../dish/dto/get-dishes.dto';
 
 class DishService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -39,14 +41,14 @@ class DishService {
           name: "Thành công",
           step: 3,
         }, */
-        { name: "Đã xác nhận", step: 3 },
+        { name: 'Đã xác nhận', step: 3 },
       ],
     });
   };
 
   createBuffetMenu = async (
-    payload: CreateBuffetMenuDTO
-  ): Promise<ResponseDishDTO<BuffetMenu>> => {
+    payload: CreateBuffetMenuDTO,
+  ): Promise<GetBuffetMenuDTO> => {
     const { createdAt, updatedAt, ...buffetMenu } =
       await this.prisma.buffetMenu.create({
         data: {
@@ -59,9 +61,7 @@ class DishService {
     return buffetMenu;
   };
 
-  createSetDish = async (
-    payload: CreateSetDishDTO
-  ): Promise<ResponseDishDTO<SetDish>> => {
+  createSetDish = async (payload: CreateSetDishDTO): Promise<GetSetDishDTO> => {
     const { createdAt, updatedAt, ...setDish } =
       await this.prisma.setDish.create({
         data: {
@@ -73,7 +73,7 @@ class DishService {
     return setDish;
   };
 
-  createDish = async (payload: CreateDish): Promise<ResponseDishDTO<Dish>> => {
+  createDish = async (payload: CreateDish): Promise<GetDishDTO> => {
     const { createdAt, updatedAt, ...setDish } = await this.prisma.dish.create({
       data: {
         name: payload.name,
@@ -85,7 +85,7 @@ class DishService {
   };
 
   connectBuffetMenuWithSetDish = async (
-    payload: ConnectDishes<SetDishConnectedDTO>
+    payload: ConnectDishes<SetDishConnectedDTO>,
   ): Promise<void> => {
     await this.prisma.buffetMenu.update({
       where: { id: payload.idSetDish },
@@ -101,7 +101,7 @@ class DishService {
   };
 
   connectSetDishWithDish = async (
-    payload: ConnectDishes<DishConnectedDTO>
+    payload: ConnectDishes<DishConnectedDTO>,
   ): Promise<void> => {
     await this.prisma.setDish.update({
       where: { id: payload.idSetDish },
@@ -117,13 +117,13 @@ class DishService {
   };
 
   disconnectBuffetMenuWithSetDish = async (
-    payload: DisconnectDishes<SetDishConnectedDTO>
+    payload: DisconnectDishes<SetDishConnectedDTO>,
   ) => {
     await this.prisma.buffetMenu.update({
-      where: { id: "cliydv7hw0000vvhkf81xcj78" },
+      where: { id: 'cliydv7hw0000vvhkf81xcj78' },
       data: {
         setDishes: {
-          disconnect: { id: "cliyffrjn0000vvbc66e875ac" },
+          disconnect: { id: 'cliyffrjn0000vvbc66e875ac' },
         },
       },
     });

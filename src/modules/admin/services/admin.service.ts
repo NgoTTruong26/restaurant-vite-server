@@ -1,13 +1,12 @@
 import { PrismaClient } from '@prisma/client';
-import { CreateAdminDTO } from '../dto/admin.dto';
-import { encrypt } from '../../../helpers/encryption.utils';
-import { ResponseAdminDTO } from '../dto/response.dto';
-import { GetAdminDTO, GetAdminListDTO } from '../dto/get-admins.dto';
 import prismaClient from '../../../configs/prisma.config';
-import { GetRoleDTO, GetRoleListDTO } from '../dto/get-roles.dto';
+import { encrypt } from '../../../helpers/encryption.utils';
+import { CreateAdminDTO } from '../dto/admin.dto';
 import { GetAdminListQueryDTO } from '../dto/get-admin-query.dto';
+import { GetAdminDTO, GetAdminListDTO } from '../dto/get-admins.dto';
+import { GetRoleListDTO } from '../dto/get-roles.dto';
 import {
-  ChangePasswordAdminDTO,
+  ChangePasswordAdminByIdDTO,
   DataUpdateAdmin,
   IDataUpdateRolesAdmin,
   UpdateProfileAdminDTO,
@@ -16,24 +15,40 @@ import {
 class AdminService {
   constructor(private prisma: PrismaClient = prismaClient) {}
 
-  createAdmin = async (payload: CreateAdminDTO): Promise<ResponseAdminDTO> => {
-    const { reqPassword, ...data } = payload;
+  createAdmin = async (payload: CreateAdminDTO): Promise<GetAdminDTO> => {
+    const { repeat_password, phoneNumber, ...data } = payload;
 
     const { password, ...admin } = await this.prisma.admin.create({
       data: {
         ...data,
-        password: await encrypt(reqPassword),
-        roles: {
-          connect: [
-            {
-              id: '',
-              position: '',
-            },
-          ],
+        phone: phoneNumber,
+        password: await encrypt(data.password),
+        gender: data.gender
+          ? {
+              connect: {
+                id: data.gender,
+              },
+            }
+          : undefined,
+        roles: data.roles
+          ? {
+              connect: data.roles.map((role) => ({
+                id: role.roleId,
+              })),
+            }
+          : undefined,
+      },
+      include: {
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
         },
-        modifiedByAdmin: {
-          connect: {
-            id: '',
+        roles: {
+          select: {
+            id: true,
+            position: true,
           },
         },
       },
@@ -168,7 +183,7 @@ class AdminService {
   };
 
   changePassword = async (
-    payload: ChangePasswordAdminDTO,
+    payload: ChangePasswordAdminByIdDTO,
   ): Promise<GetAdminDTO> => {
     const data = await this.prisma.admin.update({
       where: {

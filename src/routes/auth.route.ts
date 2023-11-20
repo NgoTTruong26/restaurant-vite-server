@@ -1,8 +1,8 @@
-import AuthController from "../modules/auth/auth.controller";
-import BaseRoute from "./base.route";
-import Verify from "../middlewares/verify.middleware";
-import AuthValidation from "../validations/auth.validation";
-import validate from "../middlewares/validate.middleware";
+import validate from '../middlewares/validate.middleware';
+import Verify from '../middlewares/verify.middleware';
+import AuthController from '../modules/auth/auth.controller';
+import AuthValidation from '../validations/auth.validation';
+import BaseRoute from './base.route';
 
 class AuthRoute extends BaseRoute {
   private authController: AuthController;
@@ -19,31 +19,37 @@ class AuthRoute extends BaseRoute {
 
   protected initializeRoutes(): void {
     this.router
+
       .get(
-        "/profile",
+        '/profile',
         this.verify.verifyAccessTokenCheckAuth,
-        this.authController.profile
+        this.authController.profile,
       )
       .get(
-        "/get-bookings-table",
+        '/get-bookings-table',
         this.verify.verifyAccessToken,
-        this.authController.getBookings
+        this.authController.getBookings,
       )
       .post(
-        "/sign-in",
-        validate(this.authValidation.signIn.body),
-        this.authController.signIn
+        '/check-auth',
+        this.verify.verifyAccessTokenCheckAuth,
+        this.authController.getProfileCheckAuth,
       )
       .post(
-        "/sign-up",
-        validate(this.authValidation.signIn.body),
-        this.authController.signUp
+        '/sign-in',
+        validate(this.authValidation.signIn),
+        this.authController.signIn,
+      )
+      .post(
+        '/sign-up',
+        validate(this.authValidation.signIn),
+        this.authController.signUp,
       )
 
       .post(
-        "/refresh-token",
+        '/refresh-token',
         this.verify.verifyRefreshToken,
-        this.authController.refreshToken
+        this.authController.refreshToken,
       );
   }
 }

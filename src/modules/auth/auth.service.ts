@@ -1,15 +1,11 @@
-import { signInDTO } from './dto/sign-in.dto';
-import { SignUpDTO } from './dto/sign-up.dto';
-import { compare, encrypt } from '../../helpers/encryption.utils';
-import {
-  IAuthDecodeToken,
-  IPayloadAuthToken,
-} from '../../interfaces/token.interfaces';
-import { generateAuthRefreshToken } from '../../services/token.service';
 import { PrismaClient } from '@prisma/client';
 import prismaClient from '../../configs/prisma.config';
+import { compare, encrypt } from '../../helpers/encryption.utils';
+import { IPayloadAuthToken } from '../../interfaces/token.interfaces';
 import { GetBookingDTO } from '../bookings/dto/booking.dto';
 import { GetUserDTO } from '../user/dto/get-user.dto';
+import { signInDTO } from './dto/sign-in.dto';
+import { SignUpDTO } from './dto/sign-up.dto';
 
 class AuthService {
   constructor(private prisma: PrismaClient = prismaClient) {}
