@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import prismaClient from '../../configs/prisma.config';
 import { compare, encrypt } from '../../helpers/encryption.utils';
 import { IPayloadAuthToken } from '../../interfaces/token.interfaces';
-import { GetBookingDTO } from '../bookings/dto/booking.dto';
 import { GetUserDTO } from '../user/dto/get-user.dto';
 import { signInDTO } from './dto/sign-in.dto';
 import { SignUpDTO } from './dto/sign-up.dto';
@@ -71,32 +70,6 @@ class AuthService {
     return data;
   };
 
-  getProfile = async (userId?: string): Promise<GetUserDTO | null> => {
-    if (!userId) {
-      return null;
-    }
-
-    const data = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      include: {
-        gender: {
-          select: {
-            id: true,
-            gender: true,
-          },
-        },
-      },
-    });
-
-    if (!data) {
-      return null;
-    }
-    const { password, ...user } = data;
-    return user;
-  };
-
   refreshToken = async (
     payload: IPayloadAuthToken,
     refreshToken: string,
@@ -122,76 +95,6 @@ class AuthService {
 
     return await this.prisma.refreshToken.delete({
       where: { token: refreshToken },
-    });
-  };
-
-  getBookings = async (userId: string): Promise<GetBookingDTO[]> => {
-    return await this.prisma.booking.findMany({
-      where: {
-        user: {
-          id: userId,
-        },
-      },
-      select: {
-        id: true,
-        phoneNumber: true,
-        author: true,
-        bookingTime: true,
-        bookingDate: true,
-        numberPeople: true,
-        note: true,
-        bookingsForChildren: {
-          select: {
-            id: true,
-            childrenCategory: {
-              select: {
-                id: true,
-                category: true,
-                deals: true,
-              },
-            },
-            quantity: true,
-          },
-        },
-        buffetMenu: {
-          select: {
-            id: true,
-            name: true,
-            price: true,
-            image: true,
-            special: true,
-          },
-        },
-        bookingStatus: {
-          select: {
-            id: true,
-            name: true,
-            step: true,
-          },
-        },
-        invoicePrice: {
-          select: {
-            id: true,
-            price: true,
-            VAT: {
-              select: {
-                id: true,
-                tax: true,
-              },
-            },
-          },
-        },
-        cancellation: true,
-        user: {
-          select: {
-            id: true,
-            fullName: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
     });
   };
 }

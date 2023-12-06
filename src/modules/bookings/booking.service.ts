@@ -1,12 +1,117 @@
-import { Booking } from '@prisma/client';
+import { EBookingStatus } from '@prisma/client';
 import prismaClient from '../../configs/prisma.config';
-import { CreateBookingDTO, GetBookingDTO } from './dto/booking.dto';
-import { GetChildrenCategoryDTO } from './dto/get-children-category.dto';
+import {
+  CreateBookingDTO,
+  GetBookingDTO,
+  GetBookingListResponse,
+} from './dto/booking.dto';
 import { GetOneBookingDTO } from './dto/get-booking-query.dto';
 import { GetBookingStatusDTO } from './dto/get-booking-status.dto';
+import { GetChildrenCategoryDTO } from './dto/get-children-category.dto';
 
 class BookingService {
   constructor(private prisma = prismaClient) {}
+
+  getBookings = async (
+    userId: string,
+    take: number = 5,
+    page: number,
+    status?: EBookingStatus,
+  ): Promise<GetBookingListResponse> => {
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.booking.findMany({
+        where: {
+          user: {
+            id: userId,
+          },
+          bookingStatus: {
+            name: status,
+          },
+        },
+        take,
+        skip: (page - 1) * take,
+        select: {
+          id: true,
+          phoneNumber: true,
+          author: true,
+          bookingTime: true,
+          bookingDate: true,
+          numberPeople: true,
+          note: true,
+          bookingsForChildren: {
+            select: {
+              id: true,
+              childrenCategory: {
+                select: {
+                  id: true,
+                  category: true,
+                  deals: true,
+                },
+              },
+              quantity: true,
+            },
+          },
+          buffetMenu: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              image: true,
+              special: true,
+            },
+          },
+          bookingStatus: {
+            select: {
+              id: true,
+              name: true,
+              step: true,
+            },
+          },
+          invoicePrice: {
+            select: {
+              id: true,
+              price: true,
+              VAT: {
+                select: {
+                  id: true,
+                  tax: true,
+                },
+              },
+            },
+          },
+          cancellation: true,
+          user: {
+            select: {
+              id: true,
+              fullName: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.booking.count({
+        where: {
+          user: {
+            id: userId,
+          },
+          bookingStatus: {
+            name: status,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        take,
+        total,
+      },
+    };
+  };
 
   getChildrenCategory = async (): Promise<GetChildrenCategoryDTO[]> => {
     const childrenCategory = await this.prisma.childrenCategory.findMany({

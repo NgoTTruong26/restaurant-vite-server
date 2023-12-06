@@ -1,4 +1,5 @@
 import validate from '../middlewares/validate.middleware';
+import Verify from '../middlewares/verify.middleware';
 import UserController from '../modules/user/user.controller';
 import UserValidation from '../validations/user.validation';
 import BaseRoute from './base.route';
@@ -6,16 +7,23 @@ import BaseRoute from './base.route';
 class UserRoute extends BaseRoute {
   private userController: UserController;
   private userValidation: UserValidation;
+  private verify: Verify;
 
   constructor() {
     super();
     this.userController = new UserController();
     this.userValidation = new UserValidation();
+    this.verify = new Verify();
     this.initializeRoutes();
   }
 
   initializeRoutes(): void {
     this.router
+      .get(
+        '/profile',
+        this.verify.verifyAccessTokenCheckAuth,
+        this.userController.profile,
+      )
       .get('/genders', this.userController.getGenders)
       .get('/users', this.userController.getUsers)
       .post(

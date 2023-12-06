@@ -219,6 +219,49 @@ class AdminService {
     return data;
   };
 
+  getProfileAdmin = async (adminId?: string): Promise<GetAdminDTO | null> => {
+    if (!adminId) {
+      return null;
+    }
+
+    const data = await this.prisma.admin.findUnique({
+      where: {
+        id: adminId,
+      },
+      select: {
+        id: true,
+        username: true,
+
+        fullName: true,
+        email: true,
+        phone: true,
+        roles: {
+          select: {
+            id: true,
+            position: true,
+          },
+          orderBy: {
+            position: 'asc',
+          },
+        },
+        dateBirth: true,
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
+        nationality: true,
+      },
+    });
+
+    if (!data) {
+      return null;
+    }
+
+    return data;
+  };
+
   getRoles = async (): Promise<GetRoleListDTO> => {
     const roles = await this.prisma.role.findMany({
       select: {

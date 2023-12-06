@@ -44,29 +44,6 @@ class AdminAuthController {
     res.send(successResponse(admin, ''));
   };
 
-  getProfileAdmin = async (
-    req: IAdminAuthRequest<IPayloadAuthTokenAdmin>,
-    res: Response,
-  ) => {
-    try {
-      const adminId = req.admin?.adminId;
-
-      if (!adminId) {
-        return res
-          .status(StatusCodes.FORBIDDEN)
-          .send(errorResponse(StatusCodes.FORBIDDEN, 'You are not authorized'));
-      }
-
-      const admin = await this.adminAuthService.getProfileAdmin(adminId);
-
-      res.send(successResponse(admin, 'Success'));
-    } catch (error) {
-      console.log(error);
-
-      res.status(StatusCodes.FORBIDDEN).send('Forbidden');
-    }
-  };
-
   changePassword = async (
     req: IAdminAuthRequest<IPayloadAuthTokenAdmin>,
     res: Response,

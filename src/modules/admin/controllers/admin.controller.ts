@@ -7,6 +7,7 @@ import {
   successResponse,
 } from '../../../helpers/response.helper';
 import {
+  IAdminAuthRequest,
   IBodyRequest,
   IBodyRequestVerifyAdmin,
   IParamsRequestVerifyAdmin,
@@ -142,6 +143,29 @@ class AdminController {
     } catch (error) {
       res.status(StatusCodes.BAD_REQUEST).send('Bad request');
       console.log(error);
+    }
+  };
+
+  getProfileAdmin = async (
+    req: IAdminAuthRequest<IPayloadAuthTokenAdmin>,
+    res: Response,
+  ) => {
+    try {
+      const adminId = req.admin?.adminId;
+
+      if (!adminId) {
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .send(errorResponse(StatusCodes.FORBIDDEN, 'You are not authorized'));
+      }
+
+      const admin = await this.adminService.getProfileAdmin(adminId);
+
+      res.send(successResponse(admin, 'Success'));
+    } catch (error) {
+      console.log(error);
+
+      res.status(StatusCodes.FORBIDDEN).send('Forbidden');
     }
   };
 

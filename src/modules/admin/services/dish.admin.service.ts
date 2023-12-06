@@ -1,19 +1,21 @@
-import { BuffetMenu, Dish, PrismaClient, SetDish } from '@prisma/client';
-import {
-  CreateBuffetMenuDTO,
-  CreateDish,
-  CreateSetDishDTO,
-} from '../dto/dish.dto';
+import { PrismaClient } from '@prisma/client';
 import prismaClient from '../../../configs/prisma.config';
+import {
+  GetBuffetMenuDTO,
+  GetDishDTO,
+  GetSetDishDTO,
+} from '../../dish/dto/get-dishes.dto';
 import {
   ConnectDishes,
   DishConnectedDTO,
   SetDishConnectedDTO,
 } from '../dto/connect-dish.dto';
 import { DisconnectDishes } from '../dto/disconnec-dish.dto';
-import { GetDishDTO } from '../../dish/dto/get-dishes.dto';
-import { GetBuffetMenuDTO } from '../../dish/dto/get-dishes.dto';
-import { GetSetDishDTO } from '../../dish/dto/get-dishes.dto';
+import {
+  CreateBuffetMenuDTO,
+  CreateDish,
+  CreateSetDishDTO,
+} from '../dto/dish.dto';
 
 class DishService {
   constructor(private prisma: PrismaClient = prismaClient) {}
@@ -28,21 +30,7 @@ class DishService {
 
   createBookingStatus = async () => {
     await this.prisma.bookingStatus.createMany({
-      data: [
-        /*  {
-          name: "Tạo yêu cầu thành công",
-          step: 1,
-        },
-        {
-          name: "Chờ xác nhận",
-          step: 2,
-        },
-        {
-          name: "Thành công",
-          step: 3,
-        }, */
-        { name: 'Đã xác nhận', step: 3 },
-      ],
+      data: [{ name: 'CANCELLED', step: 4 }],
     });
   };
 

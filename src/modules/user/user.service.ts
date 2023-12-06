@@ -16,6 +16,32 @@ import {
 class UserService {
   constructor(private prisma: PrismaClient = prismaClient) {}
 
+  getProfile = async (userId?: string): Promise<GetUserDTO | null> => {
+    if (!userId) {
+      return null;
+    }
+
+    const data = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        gender: {
+          select: {
+            id: true,
+            gender: true,
+          },
+        },
+      },
+    });
+
+    if (!data) {
+      return null;
+    }
+    const { password, ...user } = data;
+    return user;
+  };
+
   getGenders = async (): Promise<GetGenderDTO[]> => {
     const gender = await this.prisma.gender.findMany({
       select: {

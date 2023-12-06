@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EBookingStatus {
+  PENDING
+  CONFIRMED
+  SUCCESS
+  CANCELLED
+}
+
 model RefreshToken {
   id        String   @id @default(cuid())
   user      User     @relation(fields: [userId], references: [id])
@@ -229,9 +236,9 @@ model Booking {
 }
 
 model BookingStatus {
-  id       String    @id @default(cuid())
-  step     Int       @unique
-  name     String    @unique
+  id       String         @id @default(cuid())
+  step     Int            @unique
+  name     EBookingStatus @unique
   bookings Booking[]
 
   createdAt DateTime @default(now())

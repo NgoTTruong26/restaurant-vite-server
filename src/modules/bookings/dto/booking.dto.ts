@@ -1,3 +1,4 @@
+import { BaseGetList } from '../../../interfaces/getList';
 import { GetBuffetMenuDTO } from '../../dish/dto/get-dishes.dto';
 import { GetBookingStatusDTO } from './get-booking-status.dto';
 import { GetChildrenCategoryDTO } from './get-children-category.dto';
@@ -55,4 +56,8 @@ export class GetBookingDTO {
     id: string;
     fullName: string;
   } | null;
+}
+
+export class GetBookingListResponse extends BaseGetList {
+  data: GetBookingDTO[];
 }

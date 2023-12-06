@@ -1,6 +1,6 @@
-import Verify from "../middlewares/verify.middleware";
-import BookingController from "../modules/bookings/booking.controller";
-import BaseRoute from "./base.route";
+import Verify from '../middlewares/verify.middleware';
+import BookingController from '../modules/bookings/booking.controller';
+import BaseRoute from './base.route';
 
 class BookingRoute extends BaseRoute {
   private bookingController: BookingController;
@@ -15,13 +15,18 @@ class BookingRoute extends BaseRoute {
 
   protected initializeRoutes(): void {
     this.router
-      .get("/children-category", this.bookingController.getChildrenCategory)
-      .get("/", this.bookingController.getOneBooking)
-      .get("/get-booking-status", this.bookingController.getBookingStatus)
+      .get(
+        '/get-bookings-table',
+        this.verify.verifyAccessToken,
+        this.bookingController.getBookings,
+      )
+      .get('/children-category', this.bookingController.getChildrenCategory)
+      .get('/', this.bookingController.getOneBooking)
+      .get('/get-booking-status', this.bookingController.getBookingStatus)
       .post(
-        "/",
+        '/',
         this.verify.verifyBooking,
-        this.bookingController.createBooking
+        this.bookingController.createBooking,
       );
   }
 }

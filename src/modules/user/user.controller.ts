@@ -1,15 +1,17 @@
+import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import getPrismaRequestError from '../../helpers/getPrismaRequestError.helper';
 import { errorResponse, successResponse } from '../../helpers/response.helper';
 import {
+  IAuthRequest,
   IBodyRequest,
   IParamsRequest,
 } from '../../interfaces/request.interface';
+import { IPayloadAuthToken } from '../../interfaces/token.interfaces';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { ChangePasswordDTO, UpdateProfileDTO } from './dto/update-user.dto';
 import { DeleteUserDTO } from './dto/delete-user.dto';
-import { Prisma } from '@prisma/client';
-import getPrismaRequestError from '../../helpers/getPrismaRequestError.helper';
+import { ChangePasswordDTO, UpdateProfileDTO } from './dto/update-user.dto';
 import UserService from './user.service';
 
 class UserController {
@@ -17,6 +19,20 @@ class UserController {
   constructor() {
     this.userService = new UserService();
   }
+
+  profile = async (req: IAuthRequest<IPayloadAuthToken>, res: Response) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.send(successResponse<null>(null, ''));
+    }
+
+    const user = await this.userService.getProfile(userId);
+
+    if (!user) return res.send(successResponse<null>(null, ''));
+
+    res.send(successResponse(user, ''));
+  };
 
   getGenders = async (req: Request, res: Response) => {
     const genders = await this.userService.getGenders();

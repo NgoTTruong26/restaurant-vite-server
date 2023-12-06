@@ -20,16 +20,6 @@ class AuthRoute extends BaseRoute {
   protected initializeRoutes(): void {
     this.router
 
-      .get(
-        '/profile',
-        this.verify.verifyAccessTokenCheckAuth,
-        this.authController.profile,
-      )
-      .get(
-        '/get-bookings-table',
-        this.verify.verifyAccessToken,
-        this.authController.getBookings,
-      )
       .post(
         '/check-auth',
         this.verify.verifyAccessTokenCheckAuth,
