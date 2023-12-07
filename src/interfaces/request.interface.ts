@@ -37,10 +37,12 @@ export interface IRefreshTokenRequest<T, R> extends Omit<Request, 'cookies'> {
   err_jwt_exp?: string;
 }
 
-export interface IAuthRequest<T, P = any, Q = any> extends Request {
+export interface IAuthRequest<T, P = any, Q = any, B = any>
+  extends Omit<Request, 'body'> {
   user?: T;
   params: P & ParamsDictionary;
   query: Q & ParamsDictionary;
+  body: B;
 }
 
 export interface IAdminAuthRequest<T> extends Request {

@@ -5,7 +5,6 @@ import getPrismaRequestError from '../../helpers/getPrismaRequestError.helper';
 import { errorResponse, successResponse } from '../../helpers/response.helper';
 import {
   IAuthRequest,
-  IBodyRequest,
   IQueryRequest,
 } from '../../interfaces/request.interface';
 import { IPayloadAuthToken } from '../../interfaces/token.interfaces';
@@ -70,11 +69,14 @@ class BookingController {
   };
 
   createBooking = async (
-    req: IBodyRequest<CreateBookingDTO, keyof CreateBookingDTO>,
+    req: IAuthRequest<IPayloadAuthToken, any, any, CreateBookingDTO>,
     res: Response,
   ) => {
     try {
-      const booking = await this.bookingService.createBooking(req.body);
+      const booking = await this.bookingService.createBooking({
+        userId: req.user?.userId,
+        ...req.body,
+      });
 
       res.send(successResponse(booking, 'Created success'));
     } catch (error) {

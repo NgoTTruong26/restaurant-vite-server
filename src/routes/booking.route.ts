@@ -25,7 +25,7 @@ class BookingRoute extends BaseRoute {
       .get('/get-booking-status', this.bookingController.getBookingStatus)
       .post(
         '/',
-        this.verify.verifyBooking,
+        this.verify.verifyAccessToken,
         this.bookingController.createBooking,
       );
   }
