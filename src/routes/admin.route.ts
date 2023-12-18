@@ -71,13 +71,12 @@ class AdminRoute extends BaseRoute {
       )
       .put(
         '/update-profile',
-        /* validate(this.userValidation.updateUser.body), */
+        this.verify.verifyAccessTokenAdmin,
         this.adminController.updateProfileAdmin,
       )
       .put(
         '/change-password',
         this.verify.verifyAccessTokenAdmin,
-        /* validate(this.userValidation.updateUser.body), */
         this.adminController.changePassword,
       )
       .put(
@@ -90,8 +89,16 @@ class AdminRoute extends BaseRoute {
         this.verify.verifyAccessTokenAdmin,
         this.adminController.getProfileAdmin,
       )
-      .get('/admin-list', this.adminController.getAdminList)
-      .get('/get-roles', this.adminController.getRoles)
+      .get(
+        '/admin-list',
+        this.verify.verifyAccessTokenAdmin,
+        this.adminController.getAdminList,
+      )
+      .get(
+        '/get-roles',
+        this.verify.verifyAccessTokenAdmin,
+        this.adminController.getRoles,
+      )
       .get(
         '/get-admin-by-id/:id',
         this.verify.verifyAccessTokenAdmin,
