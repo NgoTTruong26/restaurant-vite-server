@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import prismaClient from '../../../configs/prisma.config';
 import { encrypt } from '../../../helpers/encryption.utils';
 import { CreateAdminDTO } from '../dto/admin.dto';
-import { GetAdminListQueryDTO } from '../dto/get-admin-query.dto';
+import { GetAdminListRequest } from '../dto/get-admin-query.dto';
 import { GetAdminDTO, GetAdminListDTO } from '../dto/get-admins.dto';
 import { GetRoleListDTO } from '../dto/get-roles.dto';
 import {
@@ -272,12 +272,9 @@ class AdminService {
 
     const total = await this.prisma.role.count();
 
-    const totalAdmins = await this.prisma.admin.count();
-
     return {
       roles,
       total,
-      totalAdmins,
     };
   };
 
@@ -285,21 +282,23 @@ class AdminService {
     page = '1',
     role,
     search,
-  }: GetAdminListQueryDTO): Promise<GetAdminListDTO | null> => {
+  }: GetAdminListRequest): Promise<GetAdminListDTO | null> => {
     const limit = 6;
+
+    console.log(search);
 
     const total = await this.prisma.admin.count({
       where: {
         fullName: {
           contains: search,
         },
-        roles: role
-          ? {
-              some: {
-                position: role,
-              },
-            }
-          : {},
+        AND: role.map((id) => ({
+          roles: {
+            some: {
+              id,
+            },
+          },
+        })),
       },
     });
 
@@ -320,13 +319,13 @@ class AdminService {
         fullName: {
           contains: search,
         },
-        roles: role
-          ? {
-              some: {
-                position: role,
-              },
-            }
-          : {},
+        AND: role.map((id) => ({
+          roles: {
+            some: {
+              id,
+            },
+          },
+        })),
       },
       select: {
         id: true,
@@ -358,6 +357,7 @@ class AdminService {
       totalPages,
       previousPage: parseInt(page) > 0 ? parseInt(page) - 1 : null,
       nextPage: total > parseInt(page) * limit ? parseInt(page) + 1 : null,
+      totalAdmins: total,
     };
   };
 

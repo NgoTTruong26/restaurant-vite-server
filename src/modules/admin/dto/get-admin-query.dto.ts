@@ -1,6 +1,6 @@
-export class GetAdminListQueryDTO {
+export class GetAdminListRequest {
   page: string;
-  role?: string;
+  role: string[];
   search?: string;
 }
 

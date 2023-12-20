@@ -23,4 +23,5 @@ export class GetAdminListDTO {
   previousPage: number | null;
   nextPage: number | null;
   totalPages: number;
+  totalAdmins: number;
 }

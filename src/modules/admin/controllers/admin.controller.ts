@@ -11,12 +11,11 @@ import {
   IBodyRequest,
   IBodyRequestVerifyAdmin,
   IParamsRequestVerifyAdmin,
-  IQueryRequest,
 } from '../../../interfaces/request.interface';
 import { IPayloadAuthTokenAdmin } from '../../../interfaces/token.interfaces';
 import { CreateAdminDTO } from '../dto/admin.dto';
 import { GetAdminParamsDTO } from '../dto/get-admin-params.dto';
-import { GetAdminListQueryDTO } from '../dto/get-admin-query.dto';
+import { GetAdminListRequest } from '../dto/get-admin-query.dto';
 import {
   ChangePasswordAdminDTO,
   IUpdateRolesAdminDTO,
@@ -181,11 +180,11 @@ class AdminController {
   };
 
   getAdminList = async (
-    req: IQueryRequest<GetAdminListQueryDTO>,
+    req: IBodyRequest<GetAdminListRequest, keyof GetAdminListRequest>,
     res: Response,
   ) => {
     try {
-      const data = await this.adminService.getAdminList(req.query);
+      const data = await this.adminService.getAdminList(req.body);
 
       res.send(successResponse(data, 'Success'));
     } catch (error) {

@@ -89,7 +89,7 @@ class AdminRoute extends BaseRoute {
         this.verify.verifyAccessTokenAdmin,
         this.adminController.getProfileAdmin,
       )
-      .get(
+      .post(
         '/admin-list',
         this.verify.verifyAccessTokenAdmin,
         this.adminController.getAdminList,
