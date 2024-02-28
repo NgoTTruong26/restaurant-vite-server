@@ -1,10 +1,11 @@
-import express from "express";
-import authRoute from "./auth.route";
-import adminRoute from "./admin.route";
-import dishRouter from "./dish.router";
-import NewsRoute from "./news.route";
-import BookingRoute from "./booking.route";
-import UserRoute from "./user.route";
+import express from 'express';
+import adminRoute from './admin.route';
+import authRoute from './auth.route';
+import BookingRoute from './booking.route';
+import dishRouter from './dish.router';
+import NewsRoute from './news.route';
+import UploadRoute from './upload.route';
+import UserRoute from './user.route';
 
 interface IRoute {
   path: string;
@@ -19,31 +20,34 @@ const newsRoute = new NewsRoute();
 
 const bookingRoute = new BookingRoute();
 
+const uploadRoute = new UploadRoute();
+
 const routes: IRoute[] = [
   {
-    path: "/",
+    path: '/',
     route: userRoute.router,
   },
   {
-    path: "/auth",
+    path: '/auth',
     route: authRoute.router,
   },
   {
-    path: "/admin",
+    path: '/admin',
     route: adminRoute.router,
   },
   {
-    path: "/buffet",
+    path: '/buffet',
     route: dishRouter.router,
   },
   {
-    path: "/news",
+    path: '/news',
     route: newsRoute.router,
   },
   {
-    path: "/booking-table",
+    path: '/booking-table',
     route: bookingRoute.router,
   },
+  { path: '/upload', route: uploadRoute.router },
 ];
 
 routes.forEach((route) => router.use(route.path, route.route));

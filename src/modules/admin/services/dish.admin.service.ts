@@ -30,7 +30,7 @@ class DishService {
 
   createBookingStatus = async () => {
     await this.prisma.bookingStatus.createMany({
-      data: [{ name: 'CANCELLED', step: 4 }],
+      data: [],
     });
   };
 

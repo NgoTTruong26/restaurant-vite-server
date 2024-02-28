@@ -7,10 +7,14 @@ import {
   IAuthRequest,
   IQueryRequest,
 } from '../../interfaces/request.interface';
-import { IPayloadAuthToken } from '../../interfaces/token.interfaces';
+import {
+  IAuthDecodeToken,
+  IPayloadAuthToken,
+} from '../../interfaces/token.interfaces';
 import { GetBookingQueryDTO } from '../auth/dto/get-booking-auth.dto';
 import BookingService from './booking.service';
 import { CreateBookingDTO } from './dto/booking.dto';
+import { CancelBookingRequest } from './dto/cancel-booking';
 import { GetOneBookingDTO } from './dto/get-booking-query.dto';
 
 class BookingController {
@@ -37,6 +41,7 @@ class BookingController {
         parseInt(req.query.take),
         parseInt(req.query.page),
         req.query.status,
+        req.query.cancellation,
       );
 
       return res.send(successResponse(bookings, 'Successfully'));
@@ -105,6 +110,23 @@ class BookingController {
       res.send(successResponse(bookingStatus, 'Success'));
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  cancelBooking = async (
+    req: IAuthRequest<IAuthDecodeToken, CancelBookingRequest>,
+    res: Response,
+  ) => {
+    try {
+      if (!req.user?.userId) {
+        throw new Error('Unauthorized');
+      }
+      await this.bookingService.cancelBooking(req.params, req.user.userId);
+      res.send(successResponse('Success'));
+    } catch (error) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(errorResponse(StatusCodes.BAD_REQUEST, 'Bad request'));
     }
   };
 }

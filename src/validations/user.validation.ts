@@ -83,6 +83,7 @@ class UserValidation {
       .messages({
         'any.required': `{{#label}} ${validateRequireMessage()}`,
       }),
+    avatarUrl: Joi.string().label('Avatar Url'),
     fullName: Joi.string()
       .label('Họ & Tên người dùng')
       .messages({

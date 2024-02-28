@@ -4,4 +4,5 @@ export interface GetBookingQueryDTO {
   take: string;
   page: string;
   status?: EBookingStatus;
+  cancellation?: boolean;
 }

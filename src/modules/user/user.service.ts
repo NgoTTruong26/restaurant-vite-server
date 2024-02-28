@@ -2,7 +2,7 @@ import { PrismaClient, User } from '@prisma/client';
 import { compare } from 'bcryptjs';
 import exclude from '../../configs/exclude.config';
 import prismaClient from '../../configs/prisma.config';
-import { encrypt } from '../../helpers/encryption.utils';
+import { encrypt } from '../../helpers/encryption.helper';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { DeleteUserDTO } from './dto/delete-user.dto';
 import { GetGenderDTO } from './dto/get-gender.dto';
@@ -97,6 +97,7 @@ class UserService {
     const dataUpdate: DataUpdate = {
       fullName: payload.fullName,
       nationality: payload.nationality,
+      avatarUrl: payload.avatarUrl,
     };
 
     if (!isNaN(new Date(`${payload.dateBirth}`).getFullYear())) {

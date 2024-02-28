@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcryptjs';
 import prismaClient from '../../../configs/prisma.config';
-import { encrypt } from '../../../helpers/encryption.utils';
+import { encrypt } from '../../../helpers/encryption.helper';
 import { signInDTO } from '../../auth/dto/sign-in.dto';
 import { GetAdminDTO } from '../dto/get-admins.dto';
 import { ChangePasswordAdminDTO } from '../dto/update-admin.dto';
@@ -48,7 +48,7 @@ class AdminAuthService {
 
   getProfileCheckAuth = async (
     adminId?: string,
-  ): Promise<Pick<GetAdminDTO, 'id' | 'fullName'> | null> => {
+  ): Promise<GetAdminDTO | null> => {
     if (!adminId) {
       return null;
     }
@@ -57,9 +57,9 @@ class AdminAuthService {
       where: {
         id: adminId,
       },
-      select: {
-        id: true,
-        fullName: true,
+      include: {
+        gender: true,
+        roles: true,
       },
     });
 

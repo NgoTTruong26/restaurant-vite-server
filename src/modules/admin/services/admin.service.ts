@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import prismaClient from '../../../configs/prisma.config';
-import { encrypt } from '../../../helpers/encryption.utils';
+import { encrypt } from '../../../helpers/encryption.helper';
 import { CreateAdminDTO } from '../dto/admin.dto';
 import { GetAdminListRequest } from '../dto/get-admin-query.dto';
 import { GetAdminDTO, GetAdminListDTO } from '../dto/get-admins.dto';
-import { GetRoleListDTO } from '../dto/get-roles.dto';
+import { GetRoleListDTO, GetRoleListRequest } from '../dto/get-roles.dto';
 import {
   ChangePasswordAdminByIdDTO,
   DataUpdateAdmin,
@@ -262,19 +262,43 @@ class AdminService {
     return data;
   };
 
-  getRoles = async (): Promise<GetRoleListDTO> => {
-    const roles = await this.prisma.role.findMany({
-      select: {
-        id: true,
-        position: true,
-      },
-    });
+  getRoles = async ({
+    page,
+    search,
+    limit,
+  }: GetRoleListRequest): Promise<GetRoleListDTO | null> => {
+    const [roles, total] = await this.prisma.$transaction([
+      this.prisma.role.findMany({
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        take: parseInt(limit),
+        select: {
+          id: true,
+          position: true,
+        },
+      }),
+      this.prisma.role.count(),
+    ]);
 
-    const total = await this.prisma.role.count();
+    const totalPages = Math.ceil(total / parseInt(limit));
+
+    if (totalPages === 0) {
+      return null;
+    }
+
+    if (parseInt(page) > totalPages) {
+      console.log(parseInt(page), totalPages);
+
+      throw new Error();
+    }
 
     return {
       roles,
       total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      previousPage: parseInt(page) > 0 ? parseInt(page) - 1 : null,
+      nextPage:
+        total > parseInt(page) * parseInt(limit) ? parseInt(page) + 1 : null,
     };
   };
 

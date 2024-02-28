@@ -1,5 +1,6 @@
 export class UpdateProfileDTO {
   id: string;
+  avatarUrl?: string;
   fullName: string;
   dateBirth?: string;
   gender?: string;
@@ -8,6 +9,7 @@ export class UpdateProfileDTO {
 
 export class DataUpdate {
   fullName?: string;
+  avatarUrl?: string;
   dateBirth?: Date;
   gender?: {
     connect: {

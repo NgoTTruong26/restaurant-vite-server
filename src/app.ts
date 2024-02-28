@@ -1,11 +1,12 @@
-import express, { NextFunction, Request, Response } from "express";
-import helmet from "helmet";
-import compression from "compression";
-import cors from "cors";
-import routes from "./routes";
-import { StatusCodes } from "http-status-codes";
-import { errorResponse } from "./helpers/response.helper";
-import cookieParser from "cookie-parser";
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
+import helmet from 'helmet';
+import { StatusCodes } from 'http-status-codes';
+import ErrorHandler from './configs/ErrorHandler.config';
+import { errorResponse } from './helpers/response.helper';
+import routes from './routes';
 
 class App {
   private app: express.Application;
@@ -37,15 +38,18 @@ class App {
     this.app.use(compression());
 
     // enable cors
-    this.app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
-    this.app.options("*", cors());
+    this.app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
+    this.app.options('*', cors());
 
     // jwt authentication
+
+    // Attach the second Error handling Middleware
+    this.app.use(ErrorHandler);
   }
 
   private initializeRoutes() {
     // v1 api routes
-    this.app.use("/v1", routes);
+    this.app.use('/v1', routes);
   }
 
   private initializeErrorHandling() {
@@ -53,7 +57,7 @@ class App {
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       res
         .status(StatusCodes.NOT_FOUND)
-        .send(errorResponse(StatusCodes.NOT_FOUND, "Not Found"));
+        .send(errorResponse(StatusCodes.NOT_FOUND, 'Not Found'));
     });
   }
 

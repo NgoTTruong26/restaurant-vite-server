@@ -5,6 +5,7 @@ import {
   GetBookingDTO,
   GetBookingListResponse,
 } from './dto/booking.dto';
+import { CancelBookingRequest } from './dto/cancel-booking';
 import { GetOneBookingDTO } from './dto/get-booking-query.dto';
 import { GetBookingStatusDTO } from './dto/get-booking-status.dto';
 import { GetChildrenCategoryDTO } from './dto/get-children-category.dto';
@@ -17,17 +18,26 @@ class BookingService {
     take: number = 5,
     page: number,
     status?: EBookingStatus,
+    cancellation?: boolean,
   ): Promise<GetBookingListResponse> => {
     const [data, total] = await this.prisma.$transaction([
       this.prisma.booking.findMany({
-        where: {
-          user: {
-            id: userId,
-          },
-          bookingStatus: {
-            name: status,
-          },
-        },
+        where: cancellation
+          ? {
+              user: {
+                id: userId,
+              },
+              cancellation: true,
+            }
+          : {
+              user: {
+                id: userId,
+              },
+              bookingStatus: {
+                name: status,
+              },
+              cancellation: false,
+            },
         take,
         skip: (page - 1) * take,
         select: {
@@ -92,14 +102,21 @@ class BookingService {
         },
       }),
       this.prisma.booking.count({
-        where: {
-          user: {
-            id: userId,
-          },
-          bookingStatus: {
-            name: status,
-          },
-        },
+        where: cancellation
+          ? {
+              user: {
+                id: userId,
+              },
+              cancellation: true,
+            }
+          : {
+              user: {
+                id: userId,
+              },
+              bookingStatus: {
+                name: status,
+              },
+            },
       }),
     ]);
 
@@ -255,7 +272,7 @@ class BookingService {
           },
           bookingStatus: {
             connect: {
-              step: 2,
+              step: 1,
             },
           },
           invoicePrice: {
@@ -361,7 +378,7 @@ class BookingService {
         },
         bookingStatus: {
           connect: {
-            step: 2,
+            step: 1,
           },
         },
         invoicePrice: {
@@ -455,6 +472,81 @@ class BookingService {
       },
     });
     return bookingStatus;
+  };
+
+  cancelBooking = async (
+    { idBooking }: CancelBookingRequest,
+    userId: string,
+  ): Promise<GetBookingDTO> => {
+    const booking = await this.prisma.booking.update({
+      where: {
+        userId: userId,
+        id: idBooking,
+      },
+      data: {
+        cancellation: true,
+      },
+      select: {
+        id: true,
+        phoneNumber: true,
+        author: true,
+        bookingTime: true,
+        bookingDate: true,
+        numberPeople: true,
+        note: true,
+        bookingsForChildren: {
+          select: {
+            id: true,
+            childrenCategory: {
+              select: {
+                id: true,
+                category: true,
+                deals: true,
+              },
+            },
+            quantity: true,
+          },
+        },
+        buffetMenu: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            image: true,
+            special: true,
+          },
+        },
+        bookingStatus: {
+          select: {
+            id: true,
+            name: true,
+            step: true,
+          },
+        },
+        invoicePrice: {
+          select: {
+            id: true,
+            price: true,
+            VAT: {
+              select: {
+                id: true,
+                tax: true,
+              },
+            },
+          },
+        },
+        cancellation: true,
+        user: {
+          select: {
+            id: true,
+
+            fullName: true,
+          },
+        },
+      },
+    });
+
+    return booking;
   };
 }
 

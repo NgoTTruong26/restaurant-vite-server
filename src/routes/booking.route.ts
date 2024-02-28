@@ -27,6 +27,11 @@ class BookingRoute extends BaseRoute {
         '/',
         this.verify.verifyAccessToken,
         this.bookingController.createBooking,
+      )
+      .put(
+        '/cancel-booking/:idBooking',
+        this.verify.verifyAccessToken,
+        this.bookingController.cancelBooking,
       );
   }
 }

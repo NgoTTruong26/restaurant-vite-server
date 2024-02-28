@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import prismaClient from '../../configs/prisma.config';
-import { compare, encrypt } from '../../helpers/encryption.utils';
+import { compare, encrypt } from '../../helpers/encryption.helper';
 import { IPayloadAuthToken } from '../../interfaces/token.interfaces';
 import { GetUserDTO } from '../user/dto/get-user.dto';
 import { signInDTO } from './dto/sign-in.dto';
@@ -46,9 +46,7 @@ class AuthService {
     return user;
   };
 
-  getProfileCheckAuth = async (
-    userId?: string,
-  ): Promise<Pick<GetUserDTO, 'id' | 'fullName'> | null> => {
+  getProfileCheckAuth = async (userId?: string): Promise<GetUserDTO | null> => {
     if (!userId) {
       return null;
     }
@@ -56,10 +54,6 @@ class AuthService {
     const data = await this.prisma.user.findUnique({
       where: {
         id: userId,
-      },
-      select: {
-        id: true,
-        fullName: true,
       },
     });
 

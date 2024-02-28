@@ -11,7 +11,6 @@ enum EBookingStatus {
   PENDING
   CONFIRMED
   SUCCESS
-  CANCELLED
 }
 
 model RefreshToken {
@@ -26,6 +25,7 @@ model RefreshToken {
 model User {
   id                     String         @id @default(cuid())
   username               String         @unique @db.VarChar(255)
+  avatarUrl              String?        @db.VarChar(255)
   fullName               String         @default("Leanne Madona") @db.VarChar(255)
   dateBirth              DateTime?
   gender                 Gender?        @relation(fields: [genderId], references: [id])
